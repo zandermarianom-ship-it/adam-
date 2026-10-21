@@ -1,5 +1,5 @@
-// Settings menu (RecompFrontend): General, Graphics, Controls and Sound tabs. No Mods tab: nothing is written
-// for this game. The settings are saved as <tab id>.json in the runtime's config path (runtime\build\data,
+// Settings menu (RecompFrontend): General, Graphics, Controls and Sound tabs, plus Bezels and Texture Packs (RecompFrontend's
+// Mods tab, for HD texture packs: texture_packs.cpp; there are no code mods for this game). The settings are saved as <tab id>.json in the runtime's config path (runtime\build\data,
 // see main.cpp), next to the stored ROM and the saves.
 //
 // Default controls are the ones adam had before the menus (input.cpp):
@@ -79,6 +79,13 @@ namespace adam {
         return std::get<bool>(recompui::config::get_general_config().get_option_value(rewind_option));
     }
 
+    const std::string texture_dump_option = "texture_dump";
+
+    // Save Textures on/off from the General tab (texture_packs.cpp).
+    bool get_texture_dump_enabled() {
+        return std::get<bool>(recompui::config::get_general_config().get_option_value(texture_dump_option));
+    }
+
     const std::string subtitles_option = "subtitles";
 
     // English subtitles for voice clips on/off from the General tab (subtitles.cpp).
@@ -102,6 +109,11 @@ namespace adam {
         general_config.add_bool_option(subtitles_option, "English Subtitles",
             "Shows an English translation at the bottom of the screen while a character speaks.",
             true);
+        general_config.add_bool_option(texture_dump_option, "Save Textures",
+            "For making HD texture packs: saves every texture the game draws as a PNG in the texture_dump folder inside "
+            "the data folder, once each. Play through the parts you want covered, then switch it off. "
+            "The game may stutter a little while it's on.",
+            false);
 
         // Reset Game sits in the General tab (user, 2026-10-12; first it had its own "Game" tab). A config tab can only
         // hold options (no buttons), so the stock General tab is hidden (its config still loads/saves general.json) and
@@ -134,6 +146,9 @@ namespace adam {
 
         recompui::config::create_sound_tab();
         adam::bezels::create_config_tab();
+        // RecompFrontend's mod list, for HD texture packs (.rtz in data\mods, texture_packs.cpp): install, switch on / off,
+        // order. adam has no code mods.
+        recompui::config::create_mods_tab("Texture Packs");
 
         // Graphics defaults for a new install (no graphics.json yet): the original N64 picture, except
         // the resolution: Original 2x. RecompFrontend's own defaults are enhancements (Auto resolution, Expand aspect

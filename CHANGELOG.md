@@ -12,6 +12,9 @@ date (`adam-<date>-<commit>.zip`).
   spoken lines; shouts and grunts don't get one); some are marked as unsure in `runtime\subtitles\voice_lines.tsv`
   and need checking by ear. A `subtitles_en.txt` in the `data` folder replaces the built-in lines, so they can be
   corrected without a new build.
+- **HD texture packs**: RT64 texture packs (`.rtz`) go into `data\mods` (or are dropped on the window) and are
+  switched on and off in the new Settings -> Texture Packs tab. Settings -> General -> Save Textures saves every texture
+  the game draws to `data\texture_dump`, and `scripts\texture_pack.py` turns upscaled copies of them into a pack.
 - **1080p resolution**: Settings -> Graphics -> Resolution has a new 1080p choice that always renders at 1080p,
   whatever the window's size (Auto picks a whole multiple of 240 lines from the window instead). Downsampling works
   with it too.

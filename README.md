@@ -48,6 +48,8 @@ built in).
 - Reset Game in Settings → General restarts the game.
 - English subtitles for the voice clips (Settings → General, on by default): 50 of the 307 clips so far, see
   [Subtitles](#subtitles).
+- HD texture packs (`.rtz`, Settings → Texture Packs) and saving the game's textures to make one, see
+  [HD texture packs](#hd-texture-packs).
 - What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 - Later parts of the game have not been played through yet. Some overlays (code the game loads on demand) have
   never run; expect problems there. Reports are welcome.
@@ -198,6 +200,23 @@ To check or extend them:
 
 Text the game draws as pictures (menus, mission instructions) isn't translated.
 
+### HD texture packs
+
+adam loads RT64 texture packs (`.rtz`), like other N64: Recompiled games: put one in `data\mods` (or drop it on the
+window) and switch it on or off in Settings → Texture Packs. No pack exists for this game yet; to make one:
+
+1. Settings → General → **Save Textures** on. Every texture the game draws is saved once to `data\texture_dump` as
+   `<hash>.v<version>.png`. Play through what the pack should cover (fast-forward helps), then switch it off.
+2. Upscale the PNGs into another folder with any tool (Upscayl, chaiNNer...). The `<hash>.v<version>` part has to
+   stay in each name (suffixes like Upscayl's are fine), and each picture has to keep its original shape.
+3. `python scripts\texture_pack.py <upscaled folder> --dump <...>\data\texture_dump --out "Evangelion HD.rtz"`
+   packs them (and warns about changed shapes, and counts the textures not covered yet).
+4. Put the `.rtz` in `data\mods` and restart.
+
+Dumps and packs are made from the game's pictures: like the ROM, don't share them.
+`runtime\src\texture_packs.cpp` has how it's wired up (`runtime\patches\recompfrontend-texture-dump.patch` adds the
+switch for RT64's texture dump).
+
 ## Repository overview
 
 | Path | What |
@@ -213,6 +232,7 @@ Text the game draws as pictures (menus, mission instructions) isn't translated.
 | `runtime\src\bezels.cpp`, `bezel_layout.h` | bezels and launcher background (picker tabs, layout math) |
 | `runtime\src\rewind.cpp` | rewind (RAM history, what is kept live) |
 | `runtime\src\subtitles.cpp`, `runtime\subtitles\` | English subtitles for voice clips (the hook, the overlay, the lines) |
+| `runtime\src\texture_packs.cpp`, `scripts\texture_pack.py` | HD texture packs (.rtz) and saving textures to make them |
 | `runtime\patches\` | fixes to RT64 (S2DEX2 2D graphics), RecompFrontend (menus) and N64ModernRuntime / N64Recomp (fast-forward, rewind, live build) |
 | `runtime\package\` | `HOW_TO_PLAY.txt` and `VERSION` for the download (`scripts\package_live.ps1`) |
 | `CHANGELOG.md` | what changed in each version |

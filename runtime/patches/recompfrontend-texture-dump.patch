@@ -1,0 +1,59 @@
+diff --git a/recompui/include/recompui/renderer.h b/recompui/include/recompui/renderer.h
+index 33f79ab..a26ea8d 100644
+--- a/recompui/include/recompui/renderer.h
++++ b/recompui/include/recompui/renderer.h
+@@ -54,6 +54,9 @@ namespace recompui {
+         void disable_texture_pack(const recomp::mods::ModHandle& mod);
+         void secondary_enable_texture_pack(const std::string& mod_id);
+         void secondary_disable_texture_pack(const std::string& mod_id);
++        // adam: save every texture the game draws (RT64's texture dump: <hash>.v<version>.png + .tmem/.rice files) into
++        // `directory` from the next frame on; an empty path stops. Textures already saved this session are skipped.
++        void set_texture_dump_directory(const std::filesystem::path& directory);
+ 
+         // Texture pack enable option. Must be an enum with two options.
+         // The first option is treated as disabled and the second option is treated as enabled.
+diff --git a/recompui/src/renderer/rt64_render_context.cpp b/recompui/src/renderer/rt64_render_context.cpp
+index 2c99aaf..7c42973 100644
+--- a/recompui/src/renderer/rt64_render_context.cpp
++++ b/recompui/src/renderer/rt64_render_context.cpp
+@@ -43,7 +43,12 @@ struct TexturePackSecondaryDisableAction {
+ struct TexturePackUpdateAction {
+ };
+ 
+-using TexturePackAction = std::variant<TexturePackEnableAction, TexturePackDisableAction, TexturePackSecondaryEnableAction, TexturePackSecondaryDisableAction, TexturePackUpdateAction>;
++// adam: start / stop RT64's texture dump (set_texture_dump_directory).
++struct TextureDumpAction {
++    std::filesystem::path directory;
++};
++
++using TexturePackAction = std::variant<TexturePackEnableAction, TexturePackDisableAction, TexturePackSecondaryEnableAction, TexturePackSecondaryDisableAction, TexturePackUpdateAction, TextureDumpAction>;
+ 
+ static moodycamel::ConcurrentQueue<TexturePackAction> texture_pack_action_queue;
+ 
+@@ -452,6 +457,15 @@ void renderer::RT64Context::check_texture_pack_actions() {
+             },
+             [&](TexturePackUpdateAction &) {
+                 packs_changed = true;
++            },
++            [&](TextureDumpAction &dump) {
++                // Same as RT64's inspector "Start dumping textures": the display list thread (this one) reads it.
++                if (!dump.directory.empty()) {
++                    std::error_code ec;
++                    std::filesystem::create_directories(dump.directory, ec);
++                    app->state->textureManager.dumpedSet.clear();
++                }
++                app->state->dumpingTexturesDirectory = dump.directory;
+             }
+         }, cur_action);
+     }
+@@ -563,6 +577,10 @@ void renderer::disable_texture_pack(const recomp::mods::ModHandle& mod) {
+     texture_pack_action_queue.enqueue(TexturePackDisableAction{mod.manifest.mod_id});
+ }
+ 
++void renderer::set_texture_dump_directory(const std::filesystem::path& directory) {
++    texture_pack_action_queue.enqueue(TextureDumpAction{directory});
++}
++
+ void renderer::secondary_enable_texture_pack(const std::string& mod_id) {
+     texture_pack_action_queue.enqueue(TexturePackSecondaryEnableAction{mod_id});
+ }

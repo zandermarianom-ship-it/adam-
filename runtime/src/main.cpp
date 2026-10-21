@@ -94,6 +94,12 @@ namespace adam::subtitles {
     void update();
 }
 
+// texture_packs.cpp: HD texture packs (.rtz mods) and saving textures to make them.
+namespace adam::texture_packs {
+    void register_content_types();
+    void update();
+}
+
 namespace adam::rewind {
     void init();
     void set_held(bool held);
@@ -536,6 +542,7 @@ static void update_gfx(ultramodern::gfx_callbacks_t::gfx_data_t) {
     check_aspect_ratio();
     adam::bezels::update();
     adam::subtitles::update();
+    adam::texture_packs::update();
 }
 
 // --- Launcher -----------------------------------------------------------------------------------
@@ -824,6 +831,7 @@ int main(int argc, char** argv) {
     for (const recomp::GameEntry& game : supported_games) {
         recomp::register_game(game);
     }
+    adam::texture_packs::register_content_types();
 
     if (rom_path != nullptr) {
         recomp::RomValidationError err = recomp::select_rom(rom_path, game_id);

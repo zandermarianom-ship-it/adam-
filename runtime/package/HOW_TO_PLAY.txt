@@ -33,6 +33,9 @@ Extras:
   Settings -> General -> English Subtitles: an English line at the bottom of the screen while a character speaks
     (on by default). Not every voice clip has one yet. To correct or add lines, put a subtitles_en.txt in the data
     folder (format: see the project's runtime\subtitles folder).
+  Settings -> Texture Packs: HD texture packs (.rtz files) put in data\mods or dropped on the window; switch them on
+    and off here. Settings -> General -> Save Textures saves the game's textures to data\texture_dump, to make a pack
+    (see the project's README, "HD texture packs").
 
 Graphics default to the original N64 picture at 2x resolution. Settings -> Graphics -> Resolution -> 1080p renders
 at 1080p whatever the window's size (pair it with Fullscreen: F11 or Alt+Enter). Higher resolutions (1080p, or
