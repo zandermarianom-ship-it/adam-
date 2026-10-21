@@ -34,8 +34,9 @@ Extras:
     (on by default). Not every voice clip has one yet. To correct or add lines, put a subtitles_en.txt in the data
     folder (format: see the project's runtime\subtitles folder).
 
-Graphics default to the original N64 picture at 2x resolution. Higher resolutions ("Auto" in a large window)
-currently show thin lines across some scaled backgrounds.
+Graphics default to the original N64 picture at 2x resolution. Settings -> Graphics -> Resolution -> 1080p renders
+at 1080p whatever the window's size (pair it with Fullscreen: F11 or Alt+Enter). Higher resolutions (1080p, or
+"Auto" in a large window) currently show thin lines across some scaled backgrounds.
 
 Requirements: Windows 10/11 x64, a GPU with Direct3D 12 or Vulkan.
 

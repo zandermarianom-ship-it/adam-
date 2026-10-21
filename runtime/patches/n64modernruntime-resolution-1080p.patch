@@ -1,0 +1,20 @@
+diff --git a/ultramodern/include/ultramodern/config.hpp b/ultramodern/include/ultramodern/config.hpp
+index 2f22456..553f12b 100644
+--- a/ultramodern/include/ultramodern/config.hpp
++++ b/ultramodern/include/ultramodern/config.hpp
+@@ -12,6 +12,7 @@ namespace ultramodern {
+             Original,
+             Original2x,
+             Auto,
++            Fixed1080p, // adam: 1080 lines (4.5x the N64's 240)
+             OptionCount
+         };
+         enum class WindowMode {
+@@ -89,6 +90,7 @@ namespace ultramodern {
+             {ultramodern::renderer::Resolution::Original, "Original"},
+             {ultramodern::renderer::Resolution::Original2x, "Original2x"},
+             {ultramodern::renderer::Resolution::Auto, "Auto"},
++            {ultramodern::renderer::Resolution::Fixed1080p, "1080p"},
+         });
+ 
+         NLOHMANN_JSON_SERIALIZE_ENUM(ultramodern::renderer::WindowMode, {

@@ -173,7 +173,10 @@ Debug keys in game: **P** pauses and resumes, **F9** writes a 4 MB RAM dump (big
 Project64's) to `dumps\inbox\` if that folder exists, otherwise next to the exe.
 
 Graphics default to the original N64 picture (4:3, the game's own frame rate, no anti-aliasing) at 2x resolution.
-Higher resolutions ("Auto" in a large window) currently show thin lines across some scaled backgrounds.
+Settings → Graphics → Resolution → **1080p** renders at 1080p (4.5x the N64's 240 lines) whatever the window's size;
+with Downsampling it renders at 2x / 4x that and scales down (`runtime\patches\*-resolution-1080p.patch` add the
+option to N64ModernRuntime and RecompFrontend). Higher resolutions (1080p, or "Auto" in a large window) currently
+show thin lines across some scaled backgrounds.
 
 ### Subtitles
 

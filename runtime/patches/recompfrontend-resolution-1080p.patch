@@ -1,0 +1,60 @@
+diff --git a/recompui/src/config/ui_config_tab_graphics.cpp b/recompui/src/config/ui_config_tab_graphics.cpp
+index 4fdf81f..a644696 100644
+--- a/recompui/src/config/ui_config_tab_graphics.cpp
++++ b/recompui/src/config/ui_config_tab_graphics.cpp
+@@ -23,6 +23,7 @@ namespace recompui {
+             {ultramodern::renderer::Resolution::Original, "Original", "Original"},
+             {ultramodern::renderer::Resolution::Original2x, "Original2x", "Original 2x"},
+             {ultramodern::renderer::Resolution::Auto, "Auto", "Auto"},
++            {ultramodern::renderer::Resolution::Fixed1080p, "1080p", "1080p"},
+         };
+ 
+         enum class DownsamplingOption {
+@@ -114,6 +115,13 @@ namespace recompui {
+                         return "Rendered in 4K and scaled to 480p";
+                     }
+                     return "";
++                case ultramodern::renderer::Resolution::Fixed1080p:
++                    if (ds_option == DownsamplingOption::X2) {
++                        return "Rendered in 4K and scaled to 1080p";
++                    } else if (ds_option == DownsamplingOption::X4) {
++                        return "Rendered in 8K and scaled to 1080p (very demanding)";
++                    }
++                    return "";
+             }
+         }
+ 
+@@ -235,7 +243,7 @@ namespace recompui {
+             config.add_enum_option(
+                 graphics::options::res_option,
+                 "Resolution",
+-                "Sets the output resolution of the game. <recomp-color primary>Original</recomp-color> matches the game's original 240p resolution. <recomp-color primary>Original 2x</recomp-color> will render at 480p. <recomp-color primary>Auto</recomp-color> will scale based on the game window's resolution.",
++                "Sets the output resolution of the game. <recomp-color primary>Original</recomp-color> matches the game's original 240p resolution. <recomp-color primary>Original 2x</recomp-color> will render at 480p. <recomp-color primary>Auto</recomp-color> will scale based on the game window's resolution. <recomp-color primary>1080p</recomp-color> always renders at 1080p, whatever the window's size.",
+                 resolution_options,
+                 ultramodern::renderer::Resolution::Auto
+             );
+@@ -252,7 +260,7 @@ namespace recompui {
+             config.add_enum_option(
+                 graphics::options::ds_option,
+                 "Downsampling Quality",
+-                "Renders at a higher resolution and scales it down to the output resolution for increased quality. Only available in <recomp-color primary>Original</recomp-color> and <recomp-color primary>Original 2x</recomp-color> resolution."
++                "Renders at a higher resolution and scales it down to the output resolution for increased quality. Only available in <recomp-color primary>Original</recomp-color>, <recomp-color primary>Original 2x</recomp-color> and <recomp-color primary>1080p</recomp-color> resolution."
+                 "<br />"
+                 "<br />"
+                 "Note: <recomp-color primary>4x</recomp-color> downsampling quality at <recomp-color primary>Original 2x</recomp-color> resolution may cause performance issues on low end devices, as it will cause the game to render <recomp-color warning>at almost 4k internal resolution</recomp-color>.",
+diff --git a/recompui/src/renderer/rt64_render_context.cpp b/recompui/src/renderer/rt64_render_context.cpp
+index c75d595..2c99aaf 100644
+--- a/recompui/src/renderer/rt64_render_context.cpp
++++ b/recompui/src/renderer/rt64_render_context.cpp
+@@ -155,6 +155,11 @@ void set_application_user_config(RT64::Application* application, const ultramode
+             application->userConfig.resolutionMultiplier = 2.0 * std::max(config.ds_option, 1);
+             application->userConfig.downsampleMultiplier = std::max(config.ds_option, 1);
+             break;
++        case ultramodern::renderer::Resolution::Fixed1080p: // adam: 240 lines x 4.5 = 1080
++            application->userConfig.resolution = RT64::UserConfiguration::Resolution::Manual;
++            application->userConfig.resolutionMultiplier = 4.5 * std::max(config.ds_option, 1);
++            application->userConfig.downsampleMultiplier = std::max(config.ds_option, 1);
++            break;
+     }
+ 
+     switch (config.hr_option) {
