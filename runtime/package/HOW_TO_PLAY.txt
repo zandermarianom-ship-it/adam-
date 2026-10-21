@@ -30,8 +30,8 @@ Extras:
     black & white, position and size).
   Launcher -> Background: the same choices for the launcher's background.
   Settings -> General -> Reset Game: restarts the game (like the console's reset).
-  Settings -> General -> English Game Text: the game's captions, briefings and cutscene lines in English (on by
-    default). Menus and titles drawn as pictures are still Japanese.
+  Settings -> General -> English Game Text: the game's captions, briefings, cutscene lines, mission titles, controls
+    screens and menu prompts in English (on by default). The staff credits are still Japanese.
   Settings -> General -> English Subtitles: an English line at the bottom of the screen while a character speaks
     (on by default). Not every voice clip has one yet. To correct or add lines, put a subtitles_en.txt in the data
     folder (format: see the project's runtime\subtitles folder).

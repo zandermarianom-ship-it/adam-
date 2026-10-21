@@ -114,7 +114,8 @@ namespace adam {
             "Sound is muted meanwhile. Not available in menus and cutscenes.",
             true);
         general_config.add_bool_option(game_text_option, "English Game Text",
-            "Shows the game's own text (mission captions, briefings, cutscene lines) in English instead of Japanese. "
+            "Shows the game's own text (mission captions, briefings, cutscene lines, mission titles, controls screens, "
+            "menu prompts) in English instead of Japanese. "
             "Text already on screen changes the next time the game draws it.",
             true);
         general_config.add_bool_option(subtitles_option, "English Subtitles",

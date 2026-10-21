@@ -61,6 +61,11 @@ namespace adam::game_text {
     const std::vector<Wrapped>& wrapped();
 }
 
+// game_images.cpp: the asset loader's wrapper (English drawn into pictures with Japanese text).
+namespace adam::game_images {
+    const std::vector<adam::game_text::Wrapped>& wrapped();
+}
+
 namespace {
     constexpr uint32_t ENTRY_VRAM = 0x80096400;
     constexpr uint32_t BOOT_ROM = 0x1000;
@@ -384,8 +389,13 @@ namespace {
                 entry_func = live_output.functions[index];
             }
         }
-        // English game text: game_text.cpp's wrappers go in the tables in place of the game's text functions (all in
-        // the boot code); every call goes through the tables, so they see every string.
+        // English game text: game_text.cpp's and game_images.cpp's wrappers go in the tables in place of the game's text
+        // functions and its asset loader (all in the boot code); every call goes through the tables, so they see every
+        // string and picture.
+        std::vector<adam::game_text::Wrapped> wrappers = adam::game_text::wrapped();
+        for (const adam::game_text::Wrapped& w : adam::game_images::wrapped()) {
+            wrappers.push_back(w);
+        }
         size_t wrapped = 0;
         for (size_t s = 0; s < section_funcs.size(); s++) {
             if (context.sections[s].rom_addr != BOOT_ROM) {
@@ -393,7 +403,7 @@ namespace {
             }
             for (FuncEntry& entry : section_funcs[s]) {
                 uint32_t vram = context.sections[s].ram_addr + entry.offset;
-                for (const adam::game_text::Wrapped& w : adam::game_text::wrapped()) {
+                for (const adam::game_text::Wrapped& w : wrappers) {
                     if (w.vram == vram && entry.func != w.wrapper) {
                         *w.original = entry.func;
                         entry.func = w.wrapper;
@@ -402,8 +412,8 @@ namespace {
                 }
             }
         }
-        if (wrapped != adam::game_text::wrapped().size()) {
-            fprintf(stderr, "[live] game text: found %zu of %zu text functions\n", wrapped, adam::game_text::wrapped().size());
+        if (wrapped != wrappers.size()) {
+            fprintf(stderr, "[live] game text: found %zu of %zu functions to wrap\n", wrapped, wrappers.size());
         }
         double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
         printf("[live] recompiled %zu functions in %.0f ms (%zu KB of code)\n", compiled, ms, live_output.code_size / 1024);

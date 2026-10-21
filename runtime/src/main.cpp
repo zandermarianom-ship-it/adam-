@@ -99,6 +99,11 @@ namespace adam::game_text {
     void update();
 }
 
+// game_images.cpp: the game's pictures with Japanese text, in English.
+namespace adam::game_images {
+    void update();
+}
+
 // texture_packs.cpp: HD texture packs (.rtz mods) and saving textures to make them.
 namespace adam::texture_packs {
     void register_content_types();
@@ -548,6 +553,7 @@ static void update_gfx(ultramodern::gfx_callbacks_t::gfx_data_t) {
     adam::bezels::update();
     adam::subtitles::update();
     adam::game_text::update();
+    adam::game_images::update();
     adam::texture_packs::update();
 }
 

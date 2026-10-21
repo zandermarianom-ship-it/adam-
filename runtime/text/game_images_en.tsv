@@ -1,0 +1,224 @@
+name	english	options
+D01S8T00	[0.42]MISSION 1\nANGEL\nATTACK	align=l
+D02S7T00	THE PHONE\nTHAT DOESN'T\nRING\n[0.42]MISSION 2	align=l
+D03STT00	SHOWDOWN\nIN TOKYO-3\n[0.42]MISSION 3	align=l
+D04S4T00	A HUMAN\nWORK\n[0.42]MISSION 4	align=l
+D04SBOSO	SUDDENLY,\nBERSERK	
+D06TITLE	MAGMA\nDIVER\n[0.42]MISSION 6	align=l
+D07STITL	THE VALUE\nOF A MIRACLE\n[0.42]MISSION 7	align=l
+D08TITLE	[0.42]MISSION 8\nTHE CHOICE\nOF LIFE	align=l
+D09TITLE	[0.42]MISSION 9\nA MAN'S\nBATTLE	
+D10TITLE	AT LEAST,\nBE HUMAN\n[0.42]MISSION 10	align=l
+D11TITL0	MISSION 11	
+D11TITL1	THE LAST\nMESSENGER	box=30,40,258,170
+D12TITLE	[0.45]MISSION 12\nAir	align=l bg=14 box=4,4,60,60
+D14TITLA	MISSION 13	box=120,120,280,170
+D14TITLE	MY PUREST\nHEART\nFOR YOU	box=20,30,268,180
+D00S1000	2000 A.D., ANTARCTICA	
+D01S1T00	The year 2015 A.D.	
+D03SJC02	Japan Standard Time	align=l
+D07S4A00	ALL LINES OUTBOUND	rect=4,4,140,28
+D01SXT00	Operation:	align=l
+D01SXT01	EVA:	align=l
+D01SXT02	Target:	align=l
+D00BAB13	Max sync ratio	align=l
+D00SSB00	MOTION	rect=0,6,86,31
+D00SSC00	VERDICT	rect=0,6,86,31
+D00SSJ00	DEBATING	rect=3,3,52,20
+D00SSJ01	PASSED	rect=3,3,52,20
+D00SSJ02	REJECTED	rect=3,3,52,20
+G00SLF00	Which file will you start from?	
+G00SLF01	Are you sure about this?	
+G00STH01	Erase all files and data\nand restore the defaults.	
+G00STH02	Are you sure?	
+M05TRS02	TRAINING	rect=4,4,60,36
+M05TRS03	COMBAT	rect=4,4,60,36
+M06MAG45	EVADE	rect=6,6,106,52
+M07DBG03	MAX ZOOM	rect=0,0,96,22
+M07DBG03	Relay: Optical Station 3	rect=0,24,96,40
+M16GED00	Shots fired:	align=l
+M16GED01	Angels destroyed:	align=l
+M16GIN01	Weapon:	align=l
+M16GIN02	Target:	align=l
+M16GIN03	Pallet Rifle	align=l
+M16GIN04	Positron Rifle	align=l
+M16GIN05	Handgun	align=l
+M16GIN06	Launcher Gun	align=l
+M16GIN07	3rd Angel Sachiel	align=l
+M16GIN08	5th Angel Ramiel	align=l
+M16GIN09	9th Angel Matarael	align=l
+M16GIN10	12th Angel Leliel	align=l
+M16GIN11	14th Angel Zeruel	align=l
+M16GSN01	Destroyed	box=0,1,48,25 squeeze=0.4
+D99ED000	DESTROYED	squeeze=0.3
+D99ED001	No.	
+D99ED002	ANGEL	squeeze=0.4
+D99ED004	SHUT DOWN	
+D99EDA03	Sachiel	
+D99EDA04	Shamshel	
+D99EDA05	Ramiel	
+D99EDA07	Israfel	
+D99EDA08	Sandalphon	
+D99EDA10	Sahaquiel	
+D99EDA13	Bardiel	
+D99EDA14	Zeruel	
+D99EDA15	Arael	
+D99EDA17	Tabris	
+D99EDAJA	Jet Alone	
+_GOVER01	MISSION FAILED	rect=4,4,252,64
+_GOVER02	OPERATION FAILED	rect=4,4,252,64
+MMVNAM00	EVA Unit-00	box=2,1,190,19
+MMVNAM01	EVA Unit-01	box=2,1,190,19
+MMVNAM02	EVA Unit-01 (Berserk)	box=2,1,190,19
+MMVNAM03	EVA Unit-01 (Awakened)	box=2,1,190,19
+MMVNAM04	EVA Unit-02	box=2,1,190,19
+MMVNAM05	EVA Unit-02 (Awakened)	box=2,1,190,19
+MMVNAM06	EVA Unit-03	box=2,1,190,19
+MMVNAM07	EVA Type-D Equipment	box=2,1,190,19
+MMVNAM08	Mass Production EVA	box=2,1,190,19
+MMVNAM09	Mass Production EVA (Flight)	box=2,1,190,19
+MMVNAM10	Lilith	box=2,1,190,19
+MMVNAM11	3rd Angel Sachiel	box=2,1,190,19
+MMVNAM12	4th Angel Shamshel (Flight)	box=2,1,190,19
+MMVNAM13	4th Angel Shamshel	box=2,1,190,19
+MMVNAM14	5th Angel Ramiel	box=2,1,190,19
+MMVNAM15	7th Angel Israfel	box=2,1,190,19
+MMVNAM16	8th Angel Sandalphon	box=2,1,190,19
+MMVNAM17	9th Angel Matarael	box=2,1,190,19
+MMVNAM18	10th Angel Sahaquiel	box=2,1,190,19
+MMVNAM19	12th Angel Leliel	box=2,1,190,19
+MMVNAM20	13th Angel Bardiel	box=2,1,190,19
+MMVNAM21	14th Angel Zeruel	box=2,1,190,19
+MMVNAM22	Jet Alone	box=2,1,190,19
+MMVNAM23	UN Heavy VTOL Fighter	box=2,1,190,19
+MMVNAM24	NERV Battleship	box=2,1,190,19
+MMVNAM25	EVA Long-Range Carrier	box=2,1,190,19
+MMVNAM26	N² Mine	box=2,1,190,19
+MMVNAM27	Progressive Knife	box=2,1,190,19
+MMVNAM28	Pallet Rifle	box=2,1,190,19
+MMVNAM29	Positron Rifle	box=2,1,190,19
+MMVNAM30	Sonic Glaive	box=2,1,190,19
+MMVNAM31	Handgun	box=2,1,190,19
+MMVNAM32	Launcher Gun	box=2,1,190,19
+MMVNAM33	Spear of Longinus	box=2,1,190,19
+MMVNAM34	Angel Catcher	box=2,1,190,19
+M01INST0	Move	rect=21,20,103,39 box=rect size=12
+M01INST0	Attack	rect=21,42,103,62 box=rect size=12
+M01INST0	Guard	rect=21,65,103,85 box=rect size=12
+M01INST0	Grab	rect=21,88,103,108 box=rect size=12
+M01INST0	Sidestep\nRun	rect=21,111,103,151 box=rect size=12
+M01INST0	AT Field	rect=21,154,103,174 box=rect size=12
+M01INST0	together	rect=190,88,299,108 box=rect size=12 align=l
+M01INST0	to run, keep	rect=170,111,299,131 box=rect size=12 align=l
+M01INST0	some distance away	rect=106,131,299,151 box=rect size=12
+M01INST0	hold	rect=162,154,299,174 box=rect size=12 align=l
+M01INST0	If the Angel neutralizes your AT Field,	rect=21,177,300,198 box=rect size=12
+M01INST0	mash alternately to break it	rect=106,198,300,218 box=rect size=12 align=l
+M02INST0	Move	rect=21,20,103,39 box=rect size=12
+M02INST0	Attack	rect=21,42,103,62 box=rect size=12
+M02INST0	Guard	rect=21,65,103,85 box=rect size=12
+M02INST0	Grab	rect=21,88,103,108 box=rect size=12
+M02INST0	Sidestep\nRun	rect=21,111,103,151 box=rect size=12
+M02INST0	AT Field	rect=21,154,103,174 box=rect size=12
+M02INST0	together	rect=190,88,299,108 box=rect size=12 align=l
+M02INST0	to run, keep	rect=170,111,299,131 box=rect size=12 align=l
+M02INST0	some distance away	rect=106,131,299,151 box=rect size=12
+M02INST0	hold	rect=162,154,299,174 box=rect size=12 align=l
+M02INST0	If the Angel neutralizes your AT Field,	rect=21,177,300,198 box=rect size=12
+M02INST0	mash alternately to break it	rect=106,198,300,218 box=rect size=12 align=l
+M08INST0	Move	rect=21,36,103,56 box=rect size=12
+M08INST0	Attack	rect=21,61,103,81 box=rect size=12
+M08INST0	Guard	rect=21,86,103,106 box=rect size=12
+M08INST0	Grab	rect=21,111,103,131 box=rect size=12
+M08INST0	Sidestep\nRun	rect=21,136,103,176 box=rect size=12
+M08INST0	AT Field	rect=21,181,103,201 box=rect size=12
+M08INST0	together	rect=190,111,299,131 box=rect size=12 align=l
+M08INST0	to run, keep	rect=170,136,299,156 box=rect size=12 align=l
+M08INST0	some distance away	rect=106,156,299,176 box=rect size=12
+M08INST0	hold	rect=162,181,299,201 box=rect size=12 align=l
+M12INST0	Move	rect=21,53,103,73 box=rect size=12
+M12INST0	Attack	rect=21,76,103,96 box=rect size=12
+M12INST0	Guard	rect=21,99,103,119 box=rect size=12
+M12INST0	Grab	rect=21,122,103,142 box=rect size=12
+M12INST0	Sidestep	rect=21,145,103,165 box=rect size=12
+M12INST0	AT Field	rect=21,168,103,188 box=rect size=12
+M12INST0	together	rect=190,122,299,142 box=rect size=12 align=l
+M12INST0	hold	rect=162,168,299,188 box=rect size=12 align=l
+M13INST0	Move	rect=21,31,103,51 box=rect size=12
+M13INST0	Attack	rect=21,54,103,74 box=rect size=12
+M13INST0	Guard	rect=21,77,103,97 box=rect size=12
+M13INST0	Grab	rect=21,100,103,120 box=rect size=12
+M13INST0	Take sword	rect=21,123,103,143 box=rect size=12
+M13INST0	Sidestep\nRun	rect=21,146,103,186 box=rect size=12
+M13INST0	AT Field	rect=21,191,103,207 box=rect size=12
+M13INST0	together	rect=190,100,299,120 box=rect size=12 align=l
+M13INST0	Near the sword:	rect=106,123,220,143 box=rect size=12 align=r
+M13INST0	to run, keep	rect=170,147,299,166 box=rect size=12 align=l
+M13INST0	some distance away	rect=106,166,299,186 box=rect size=12
+M13INST0	hold	rect=162,191,299,207 box=rect size=12 align=l
+M14INST0	Move	rect=21,98,103,118 box=rect size=12
+M14INST0	Attack	rect=21,121,103,141 box=rect size=12
+M11INST0	Move	rect=21,45,103,65 box=rect size=12
+M11INST0	Attack	rect=21,70,103,90 box=rect size=12
+M11INST0	Guard/Parry	rect=21,95,103,115 box=rect size=12
+M11INST0	Grab	rect=21,120,103,140 box=rect size=12
+M11INST0	Struggle	rect=21,145,103,185 box=rect size=12
+M11INST0	slash	rect=132,70,186,90 box=rect size=12 align=l
+M11INST0	thrust	rect=240,70,299,90 box=rect size=12 align=l
+M11INST0	together	rect=187,120,299,140 box=rect size=12 align=l
+M11INST0	Until the center gauge swings right,	rect=106,146,299,165 box=rect size=12
+M11INST0	mash	rect=106,165,180,184 box=rect size=12 align=r
+M11INST0	alternately	rect=226,165,299,184 box=rect size=12 align=l
+M03INST0	moves	rect=82,48,110,80 box=rect size=12
+M03INST0	onto	rect=126,48,150,80 box=rect size=12
+M03INST0	 	rect=170,48,287,80 box=rect size=12
+M03INST0	Both	rect=36,118,99,144 box=rect size=12 align=r
+M03INST0	meet in the middle	rect=154,118,287,144 box=rect size=12 align=l
+M03INST0	= locked on:	rect=87,148,174,182 box=rect size=12
+M03INST0	to fire	rect=224,148,287,182 box=rect size=12 align=l
+M04INST0	Catch up with JA	rect=123,32,280,51 box=rect size=12
+M04INST0	mash to run	rect=122,61,249,84 box=rect size=12 align=l
+M04INST0	and catch JA in time	rect=75,84,249,106 box=rect size=12
+M04INST0	Hold JA back	rect=124,119,281,139 box=rect size=12
+M04INST0	For a while, hold JA with	rect=75,150,208,172 box=rect size=12 align=r
+M04INST0	+	rect=230,150,249,172 box=rect size=12
+M04INST0	mashed alternately	rect=122,172,249,195 box=rect size=12 align=l
+M05INST0	Command Input	rect=113,46,206,63 box=rect size=12
+M05INST0	While the command line moves	rect=37,75,285,95 box=rect size=12
+M05INST0	through the zone, use	rect=37,95,170,113 box=rect size=12 align=r
+M05INST0	to	rect=207,95,285,113 box=rect size=12 align=l
+M05INST0	enter three commands	rect=37,113,285,133 box=rect size=12
+M05INST0	Command line	rect=182,199,258,211 box=rect size=12 size=8
+M06INST0	Find the Angel	rect=28,37,131,58 box=rect size=12
+M06INST0	Catch the Angel	rect=28,64,131,107 box=rect size=12
+M06INST0	Center the Angel,	rect=134,65,292,86 box=rect size=12
+M06INST0	then press	rect=134,86,195,106 box=rect size=12 align=r
+M06INST0	 	rect=214,86,292,106 box=rect size=12
+M06INST0	Attack	rect=28,113,131,170 box=rect size=12
+M06INST0	Enter the shown	rect=134,114,228,134 box=rect size=12 align=r
+M06INST0	 	rect=262,114,292,134 box=rect size=12
+M06INST0	commands in order	rect=134,134,292,152 box=rect size=12
+M06INST0	 	rect=134,152,292,170 box=rect size=12
+M06INST0	Evade	rect=28,178,131,198 box=rect size=12
+M07INST0	Jump over obstacles	rect=134,28,287,48 box=rect size=12
+M07INST0	widens the success zone	rect=162,54,287,73 box=rect size=12 align=l
+M07INST0	Success zone:	rect=55,107,116,127 box=rect size=12 align=r
+M07INST0	to jump	rect=136,107,210,127 box=rect size=12 align=l
+M07INST0	Hold the Angel back	rect=134,140,287,160 box=rect size=12
+M07INST0	Until the center gauge swings right,	rect=33,168,287,188 box=rect size=12
+M07INST0	mash	rect=33,188,138,207 box=rect size=12 align=r
+M07INST0	alternately	rect=187,188,287,207 box=rect size=12 align=l
+M09INST0	Attack	rect=41,63,80,160 box=rect size=12 squeeze=0.3
+M09INST0	Partway through the automatic	rect=83,66,280,88 box=rect size=12
+M09INST0	action, enter the shown	rect=83,88,280,110 box=rect size=12
+M09INST0	+	rect=107,111,121,133 box=rect size=12
+M09INST0	combos	rect=175,111,280,133 box=rect size=12 align=l
+M09INST0	as they appear	rect=83,134,280,158 box=rect size=12
+M10INST0	Steer to the target	rect=131,36,276,56 box=rect size=12
+M10INST0	aims the Spear: position	rect=99,65,266,85 box=rect size=12 align=l
+M10INST0	and angle on the target center	rect=57,85,266,105 box=rect size=12
+M10INST0	(bring X and Y near 0)	rect=57,105,266,125 box=rect size=12
+M10INST0	Break its AT Field	rect=131,136,276,156 box=rect size=12
+M10INST0	Until the center gauge swings right,	rect=57,165,266,185 box=rect size=12
+M10INST0	mash	rect=57,185,139,204 box=rect size=12 align=r
+M10INST0	alternately	rect=185,185,266,204 box=rect size=12 align=l

@@ -47,8 +47,8 @@ built in).
 - Widescreen (a wide aspect ratio in Settings → Graphics) is used only in mission battles; everything else stays 4:3.
 - Reset Game in Settings → General restarts the game.
 - The game's own text in English (Settings → General → English Game Text, on by default): mission captions,
-  briefings and cutscene lines, see [Game text](#game-text). Text the game draws as pictures (menus, titles) is
-  still Japanese.
+  briefings and cutscene lines, and the pictures with Japanese in them (mission title cards, control screens, menu
+  prompts, results), see [Game text](#game-text). The staff credits are still Japanese.
 - English subtitles for the voice clips (Settings → General, on by default): 50 of the 307 clips so far, see
   [Subtitles](#subtitles).
 - HD texture packs (`.rtz`, Settings → Texture Packs) and saving the game's textures to make one, see
@@ -215,7 +215,15 @@ English; `\n` is a line break, leading spaces and an empty first line keep the g
 `python scripts\game_text.py` rebuilds `runtime\src\game_text_en.inc` (the lines and the font: Liberation Serif Bold
 drawn at 19 px); `--check` lists lines squeezed by more than 15% and `--preview <folder>` draws each one as a PNG.
 
-Text the game draws as pictures (menus, titles, mission instructions) isn't translated yet.
+Pictures with Japanese text in them (mission title cards, the controls screen before each mission, menu prompts,
+briefing and results labels, Angel and weapon names; 116 pictures) get the English drawn into them as they're loaded:
+every named picture comes in through the game's asset loader (func_8009930C), and `runtime\src\game_images.cpp`
+(in the loader's place in the live build) writes a patch over the part holding the Japanese. The patches are made by
+`python scripts\game_images.py --rom <your rom>` from `runtime\text\game_images_en.tsv` (picture name, English,
+options such as the rectangle to redraw: the script's header has them all; `--preview <folder>` draws each picture
+before and after). The English is drawn from scratch in the picture's own colours (letter fill row by row, outline,
+background), so the patches hold none of the original art; they're made from your ROM only to pick those colours.
+Still Japanese: the staff credits, the copyright lines and a few small signs inside scenery pictures.
 
 ### HD texture packs
 
@@ -250,6 +258,7 @@ switch for RT64's texture dump).
 | `runtime\src\rewind.cpp` | rewind (RAM history, what is kept live) |
 | `runtime\src\subtitles.cpp`, `runtime\subtitles\` | English subtitles for voice clips (the hook, the overlay, the lines) |
 | `runtime\src\game_text.cpp`, `runtime\text\`, `scripts\game_text.py` | the game's own text in English (the wrappers, the lines, the font) |
+| `runtime\src\game_images.cpp`, `scripts\game_images.py` | the pictures with Japanese text, in English (the loader's wrapper, the patches) |
 | `runtime\src\texture_packs.cpp`, `scripts\texture_pack.py` | HD texture packs (.rtz) and saving textures to make them |
 | `runtime\patches\` | fixes to RT64 (S2DEX2 2D graphics), RecompFrontend (menus) and N64ModernRuntime / N64Recomp (fast-forward, rewind, live build) |
 | `runtime\package\` | `HOW_TO_PLAY.txt` and `VERSION` for the download (`scripts\package_live.ps1`) |
