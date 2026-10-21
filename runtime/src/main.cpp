@@ -89,6 +89,11 @@ namespace adam::bezels {
     void open_launcher_background_settings();
 }
 
+// subtitles.cpp: English captions for voice clips.
+namespace adam::subtitles {
+    void update();
+}
+
 namespace adam::rewind {
     void init();
     void set_held(bool held);
@@ -530,6 +535,7 @@ static void update_gfx(ultramodern::gfx_callbacks_t::gfx_data_t) {
     write_state_file();
     check_aspect_ratio();
     adam::bezels::update();
+    adam::subtitles::update();
 }
 
 // --- Launcher -----------------------------------------------------------------------------------

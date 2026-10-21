@@ -5,7 +5,13 @@ date (`adam-<date>-<commit>.zip`).
 
 ## Unreleased
 
-Nothing yet.
+### New
+
+- **English subtitles** for the voice clips: while a character speaks, an English line shows at the bottom of the
+  screen. On/off in Settings -> General (on by default). 50 of the game's 307 voice clips have a line so far (the
+  spoken lines; shouts and grunts don't get one); some are marked as unsure in `runtime\subtitles\voice_lines.tsv`
+  and need checking by ear. A `subtitles_en.txt` in the `data` folder replaces the built-in lines, so they can be
+  corrected without a new build.
 
 ## 0.1.1 (2026-10-13)
 

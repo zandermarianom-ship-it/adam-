@@ -79,6 +79,13 @@ namespace adam {
         return std::get<bool>(recompui::config::get_general_config().get_option_value(rewind_option));
     }
 
+    const std::string subtitles_option = "subtitles";
+
+    // English subtitles for voice clips on/off from the General tab (subtitles.cpp).
+    bool get_subtitles_enabled() {
+        return std::get<bool>(recompui::config::get_general_config().get_option_value(subtitles_option));
+    }
+
     void init_config() {
         recompui::config::GeneralTabOptions general_options{};
         general_options.has_rumble_strength = true;
@@ -91,6 +98,9 @@ namespace adam {
         general_config.add_bool_option(rewind_option, "Rewind",
             "Hold the Rewind button (Controls tab; default: left stick click, keyboard Backspace) during missions to run the game backwards, up to 10 seconds. "
             "Sound is muted meanwhile. Not available in menus and cutscenes.",
+            true);
+        general_config.add_bool_option(subtitles_option, "English Subtitles",
+            "Shows an English translation at the bottom of the screen while a character speaks.",
             true);
 
         // Reset Game sits in the General tab (user, 2026-10-12; first it had its own "Game" tab). A config tab can only

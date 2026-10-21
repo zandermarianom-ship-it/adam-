@@ -46,6 +46,8 @@ built in).
   All pictures are read from your ROM.
 - Widescreen (a wide aspect ratio in Settings → Graphics) is used only in mission battles; everything else stays 4:3.
 - Reset Game in Settings → General restarts the game.
+- English subtitles for the voice clips (Settings → General, on by default): 50 of the 307 clips so far, see
+  [Subtitles](#subtitles).
 - What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 - Later parts of the game have not been played through yet. Some overlays (code the game loads on demand) have
   never run; expect problems there. Reports are welcome.
@@ -173,6 +175,26 @@ Project64's) to `dumps\inbox\` if that folder exists, otherwise next to the exe.
 Graphics default to the original N64 picture (4:3, the game's own frame rate, no anti-aliasing) at 2x resolution.
 Higher resolutions ("Auto" in a large window) currently show thin lines across some scaled backgrounds.
 
+### Subtitles
+
+While a character speaks, an English line shows at the bottom of the screen (Settings → General → English
+Subtitles). All of the game's voice is in one effect bank of 307 clips (`runtime\src\subtitles.cpp` has how they're
+found); 50 of them are spoken lines and have a subtitle, the rest are shouts, grunts and screams.
+
+The lines live in `runtime\subtitles\voice_lines.tsv` (clip number, length, speaker, the Japanese, the English, a
+note). The Japanese was transcribed with Whisper (small) and then corrected by hand, mostly from the anime's own
+lines the game quotes; rows noted `?` were reconstructed from a rough transcription and should be checked by ear.
+To check or extend them:
+
+1. `python scripts\extract_voices.py` writes every clip from your ROM as `dumps\voices\B_<number>.wav` (ROM
+   data: don't share the WAVs).
+2. Edit `voice_lines.tsv`; an empty `english` means no subtitle for that clip.
+3. `python scripts\subtitles.py` rebuilds the built-in table (`runtime\src\subtitles_en.inc`). To try changes
+   without building, `python scripts\subtitles.py --txt` writes `runtime\subtitles\subtitles_en.txt`: copy it to
+   `data\subtitles_en.txt` next to `adam.exe` and it replaces the built-in lines at the next start.
+
+Text the game draws as pictures (menus, mission instructions) isn't translated.
+
 ## Repository overview
 
 | Path | What |
@@ -187,6 +209,7 @@ Higher resolutions ("Auto" in a large window) currently show thin lines across s
 | `runtime\src\launcher_art.cpp` | decodes the game's pictures from the stored ROM |
 | `runtime\src\bezels.cpp`, `bezel_layout.h` | bezels and launcher background (picker tabs, layout math) |
 | `runtime\src\rewind.cpp` | rewind (RAM history, what is kept live) |
+| `runtime\src\subtitles.cpp`, `runtime\subtitles\` | English subtitles for voice clips (the hook, the overlay, the lines) |
 | `runtime\patches\` | fixes to RT64 (S2DEX2 2D graphics), RecompFrontend (menus) and N64ModernRuntime / N64Recomp (fast-forward, rewind, live build) |
 | `runtime\package\` | `HOW_TO_PLAY.txt` and `VERSION` for the download (`scripts\package_live.ps1`) |
 | `CHANGELOG.md` | what changed in each version |
