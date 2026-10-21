@@ -110,7 +110,7 @@ endif()
 set(RSP_DIR "${CMAKE_SOURCE_DIR}/../rsp")
 
 # Main executable
-add_executable(adam src/main.cpp src/input.cpp src/audio.cpp src/config.cpp src/rsp_interp.cpp src/launcher_art.cpp src/bezels.cpp src/subtitles.cpp src/texture_packs.cpp src/rewind.cpp
+add_executable(adam src/main.cpp src/input.cpp src/audio.cpp src/config.cpp src/rsp_interp.cpp src/launcher_art.cpp src/bezels.cpp src/subtitles.cpp src/game_text.cpp src/texture_packs.cpp src/rewind.cpp
     src/embedded_files_unpack.cpp ${CMAKE_BINARY_DIR}/embedded_files.cpp)
 
 # Version shown in the launcher = package\VERSION (the release number, also used by scripts\package_live.ps1).

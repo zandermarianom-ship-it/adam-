@@ -94,6 +94,11 @@ namespace adam::subtitles {
     void update();
 }
 
+// game_text.cpp: the game's own text in English.
+namespace adam::game_text {
+    void update();
+}
+
 // texture_packs.cpp: HD texture packs (.rtz mods) and saving textures to make them.
 namespace adam::texture_packs {
     void register_content_types();
@@ -542,6 +547,7 @@ static void update_gfx(ultramodern::gfx_callbacks_t::gfx_data_t) {
     check_aspect_ratio();
     adam::bezels::update();
     adam::subtitles::update();
+    adam::game_text::update();
     adam::texture_packs::update();
 }
 

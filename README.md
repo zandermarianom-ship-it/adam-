@@ -46,6 +46,9 @@ built in).
   All pictures are read from your ROM.
 - Widescreen (a wide aspect ratio in Settings → Graphics) is used only in mission battles; everything else stays 4:3.
 - Reset Game in Settings → General restarts the game.
+- The game's own text in English (Settings → General → English Game Text, on by default): mission captions,
+  briefings and cutscene lines, see [Game text](#game-text). Text the game draws as pictures (menus, titles) is
+  still Japanese.
 - English subtitles for the voice clips (Settings → General, on by default): 50 of the 307 clips so far, see
   [Subtitles](#subtitles).
 - HD texture packs (`.rtz`, Settings → Texture Packs) and saving the game's textures to make one, see
@@ -198,7 +201,21 @@ To check or extend them:
    without building, `python scripts\subtitles.py --txt` writes `runtime\subtitles\subtitles_en.txt`: copy it to
    `data\subtitles_en.txt` next to `adam.exe` and it replaces the built-in lines at the next start.
 
-Text the game draws as pictures (menus, mission instructions) isn't translated.
+### Game text
+
+The captions, mission briefings and cutscene lines the game writes out with its font are shown in English (Settings
+→ General → English Game Text). The game keeps them as strings of 16-bit character codes in its overlays and draws
+every one through the same few functions in its boot code; the live build puts `runtime\src\game_text.cpp` in their
+place, which draws the English for the strings it knows (in the game's look: grey-to-white letters, dark outline and
+shadow) and leaves any other string to the game. The English picture keeps the Japanese one's width, so it stays where
+the game puts it; a line wider than that is squeezed to fit. (The static build doesn't have this yet.)
+
+The 214 lines are in `runtime\text\game_text_en.tsv` (a hash of the game's string, its ROM offset, the Japanese, the
+English; `\n` is a line break, leading spaces and an empty first line keep the game's layout). After editing it,
+`python scripts\game_text.py` rebuilds `runtime\src\game_text_en.inc` (the lines and the font: Liberation Serif Bold
+drawn at 19 px); `--check` lists lines squeezed by more than 15% and `--preview <folder>` draws each one as a PNG.
+
+Text the game draws as pictures (menus, titles, mission instructions) isn't translated yet.
 
 ### HD texture packs
 
@@ -232,6 +249,7 @@ switch for RT64's texture dump).
 | `runtime\src\bezels.cpp`, `bezel_layout.h` | bezels and launcher background (picker tabs, layout math) |
 | `runtime\src\rewind.cpp` | rewind (RAM history, what is kept live) |
 | `runtime\src\subtitles.cpp`, `runtime\subtitles\` | English subtitles for voice clips (the hook, the overlay, the lines) |
+| `runtime\src\game_text.cpp`, `runtime\text\`, `scripts\game_text.py` | the game's own text in English (the wrappers, the lines, the font) |
 | `runtime\src\texture_packs.cpp`, `scripts\texture_pack.py` | HD texture packs (.rtz) and saving textures to make them |
 | `runtime\patches\` | fixes to RT64 (S2DEX2 2D graphics), RecompFrontend (menus) and N64ModernRuntime / N64Recomp (fast-forward, rewind, live build) |
 | `runtime\package\` | `HOW_TO_PLAY.txt` and `VERSION` for the download (`scripts\package_live.ps1`) |
@@ -255,7 +273,8 @@ switch for RT64's texture dump).
 - [sljit](https://github.com/zherczeg/sljit) (BSD), the code generator inside N64Recomp's live recompiler
 - [splat](https://github.com/ethteck/splat) and [rabbitizer](https://github.com/Decompollaborate/rabbitizer) (MIT),
   [n64sym](https://github.com/shygoo/n64sym) for identifying library functions
-- Fonts: Inter and Noto Emoji (SIL Open Font License), promptfont (see `runtime\assets\promptfont\LICENSE.txt`)
+- Fonts: Inter and Noto Emoji (SIL Open Font License), Liberation Serif (SIL Open Font License; drawn into the English
+  game text's glyphs), promptfont (see `runtime\assets\promptfont\LICENSE.txt`)
 - [Project64](https://www.pj64-emu.com/), used to compare RAM dumps and saves
 
 ## License

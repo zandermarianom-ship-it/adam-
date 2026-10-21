@@ -50,6 +50,17 @@ extern "C" void adam_rewind_frame(uint8_t* rdram); // rewind.cpp
 extern "C" void adam_rewind_reset(void);
 uint32_t adam_frame_count(); // main.cpp
 
+// game_text.cpp: wrappers that take the place of the game's text functions (they call the game's own for text they
+// don't translate).
+namespace adam::game_text {
+    struct Wrapped {
+        uint32_t vram;
+        recomp_func_t* wrapper;
+        recomp_func_t** original;
+    };
+    const std::vector<Wrapped>& wrapped();
+}
+
 namespace {
     constexpr uint32_t ENTRY_VRAM = 0x80096400;
     constexpr uint32_t BOOT_ROM = 0x1000;
@@ -372,6 +383,27 @@ namespace {
             if (context.functions[index].rom == BOOT_ROM) {
                 entry_func = live_output.functions[index];
             }
+        }
+        // English game text: game_text.cpp's wrappers go in the tables in place of the game's text functions (all in
+        // the boot code); every call goes through the tables, so they see every string.
+        size_t wrapped = 0;
+        for (size_t s = 0; s < section_funcs.size(); s++) {
+            if (context.sections[s].rom_addr != BOOT_ROM) {
+                continue;
+            }
+            for (FuncEntry& entry : section_funcs[s]) {
+                uint32_t vram = context.sections[s].ram_addr + entry.offset;
+                for (const adam::game_text::Wrapped& w : adam::game_text::wrapped()) {
+                    if (w.vram == vram && entry.func != w.wrapper) {
+                        *w.original = entry.func;
+                        entry.func = w.wrapper;
+                        wrapped++;
+                    }
+                }
+            }
+        }
+        if (wrapped != adam::game_text::wrapped().size()) {
+            fprintf(stderr, "[live] game text: found %zu of %zu text functions\n", wrapped, adam::game_text::wrapped().size());
         }
         double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
         printf("[live] recompiled %zu functions in %.0f ms (%zu KB of code)\n", compiled, ms, live_output.code_size / 1024);

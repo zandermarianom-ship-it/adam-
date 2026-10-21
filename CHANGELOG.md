@@ -7,6 +7,10 @@ date (`adam-<date>-<commit>.zip`).
 
 ### New
 
+- **The game's own text in English**: the mission-intro captions, the briefings (target, EVA, operation) and the
+  cutscene lines are now drawn in English, in the game's own style, where the game drew Japanese. On/off in
+  Settings -> General -> English Game Text (on by default). 214 lines, in `runtime\text\game_text_en.tsv`. Text the
+  game draws as pictures (menus, titles) is still Japanese.
 - **English subtitles** for the voice clips: while a character speaks, an English line shows at the bottom of the
   screen. On/off in Settings -> General (on by default). 50 of the game's 307 voice clips have a line so far (the
   spoken lines; shouts and grunts don't get one); some are marked as unsure in `runtime\subtitles\voice_lines.tsv`
