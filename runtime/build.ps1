@@ -9,6 +9,14 @@ param(
 $ErrorActionPreference = "Stop"
 
 $vsRoot = "C:\Program Files\Microsoft Visual Studio\18\Community"
+# Another Visual Studio (edition or version, e.g. the GitHub Actions runner's): ask vswhere where the C++ tools are.
+if (-not (Test-Path "$vsRoot\VC\Auxiliary\Build\vcvars64.bat")) {
+    $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+    if (Test-Path $vswhere) {
+        $found = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+        if ($found) { $vsRoot = $found.Trim() }
+    }
+}
 $vcvars = "$vsRoot\VC\Auxiliary\Build\vcvars64.bat"
 $ninja  = "$vsRoot\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe"
 $llvm   = "C:\Program Files\LLVM\bin"

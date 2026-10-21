@@ -1,0 +1,74 @@
+# Builds the download (the live build: no game code inside, the player's ROM is translated at startup) on GitHub's
+# Windows machines, so nobody has to install Visual Studio to play: README "Building the download", automated.
+# Runs on every push to main / english-subtitles and by hand (Actions -> Build -> Run workflow). The zip ends up as
+# a release named "Latest build" (Releases page), replaced by each newer build, and as the run's artifact.
+name: Build
+
+on:
+  push:
+    branches: [main, english-subtitles]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - name: Check out adam
+        uses: actions/checkout@v4
+        with:
+          path: adam
+
+      # The dependencies at the commits adam was built and tested with, next to adam\ (README "Folder layout").
+      - name: Check out the dependencies
+        shell: pwsh
+        run: |
+          $deps = @(
+            @("N64Recomp", "https://github.com/N64Recomp/N64Recomp", "ffb39cd"),
+            @("N64ModernRuntime", "https://github.com/N64Recomp/N64ModernRuntime", "cdf5abb"),
+            @("rt64", "https://github.com/rt64/rt64", "8bd2cf1"),
+            @("RecompFrontend", "https://github.com/N64Recomp/RecompFrontend", "b1a1477"))
+          foreach ($d in $deps) {
+            git clone --quiet $d[1] $d[0]
+            git -C $d[0] checkout --quiet $d[2]
+            git -C $d[0] submodule update --init --recursive --quiet
+            if ($LASTEXITCODE -ne 0) { throw "could not check out $($d[0])" }
+          }
+
+      - name: Build the live shell
+        shell: pwsh
+        working-directory: adam
+        run: |
+          clang-cl --version
+          powershell -ExecutionPolicy Bypass -File runtime\build.ps1 -Live -Config Release
+          if ($LASTEXITCODE -ne 0) { throw "build failed" }
+
+      - name: Package
+        shell: pwsh
+        working-directory: adam
+        run: |
+          powershell -ExecutionPolicy Bypass -File scripts\package_live.ps1 -Name "build$env:GITHUB_RUN_NUMBER"
+          if ($LASTEXITCODE -ne 0) { throw "packaging failed" }
+          $zip = Get-ChildItem packages\*.zip | Select-Object -First 1
+          "ZIP=$($zip.FullName)" >> $env:GITHUB_ENV
+          "ZIPNAME=$($zip.Name)" >> $env:GITHUB_ENV
+
+      - name: Upload the zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: adam-windows
+          path: ${{ env.ZIP }}
+
+      # One release, "latest-build", always holding the newest zip.
+      - name: Publish as the latest build
+        shell: pwsh
+        working-directory: adam
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest-build --yes --cleanup-tag 2>$null
+          $notes = "Built automatically from $env:GITHUB_REF_NAME ($($env:GITHUB_SHA.Substring(0,7))). Unzip anywhere, run adam.exe, choose Load ROM and pick your own ROM (Japanese, .z64). Contains no game data."
+          gh release create latest-build "$env:ZIP" --title "Latest build" --notes $notes --target $env:GITHUB_SHA --prerelease
