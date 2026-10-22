@@ -1,0 +1,66 @@
+diff --git a/ultramodern/include/ultramodern/ultramodern.hpp b/ultramodern/include/ultramodern/ultramodern.hpp
+index c42e5a4..f7434c5 100644
+--- a/ultramodern/include/ultramodern/ultramodern.hpp
++++ b/ultramodern/include/ultramodern/ultramodern.hpp
+@@ -134,6 +134,11 @@ struct FrameLogEntry {
+ };
+ void frame_log_enable(bool enable);
+ std::vector<FrameLogEntry> frame_log_take();
++// adam: a game whose frame is several graphics tasks tells which task ends a frame (ends_frame(rdram, OSTask address),
++// read when the task is submitted). While the renderer draws a task that doesn't, current_task_continues_frame() is
++// true and the renderer keeps it in the same frame as the next task (RT64 matches and interpolates whole frames).
++void set_frame_end_detector(bool (*ends_frame)(uint8_t* rdram, uint32_t task_address));
++bool current_task_continues_frame();
+ 
+ // Audio
+ void init_audio();
+diff --git a/ultramodern/src/events.cpp b/ultramodern/src/events.cpp
+index 7c4433c..1d2bd17 100644
+--- a/ultramodern/src/events.cpp
++++ b/ultramodern/src/events.cpp
+@@ -26,6 +26,7 @@ void ultramodern::events::set_callbacks(const ultramodern::events::callbacks_t&
+ 
+ struct SpTaskAction {
+     OSTask task;
++    bool ends_frame = true; // adam: see set_frame_end_detector
+ };
+ 
+ struct ScreenUpdateAction {
+@@ -221,6 +222,17 @@ std::vector<ultramodern::FrameLogEntry> ultramodern::frame_log_take() {
+     return out;
+ }
+ 
++static bool (*frame_end_detector)(uint8_t* rdram, uint32_t task_address) = nullptr;
++static std::atomic<bool> task_continues_frame = false;
++
++void ultramodern::set_frame_end_detector(bool (*ends_frame)(uint8_t* rdram, uint32_t task_address)) {
++    frame_end_detector = ends_frame;
++}
++
++bool ultramodern::current_task_continues_frame() {
++    return task_continues_frame.load();
++}
++
+ void ultramodern::set_swap_gate(uint32_t (*pending_tasks)()) {
+     swap_pending_tasks = pending_tasks;
+ }
+@@ -472,7 +484,9 @@ void gfx_thread_func(uint8_t* rdram, moodycamel::LightweightSemaphore* thread_re
+ 
+                 [[maybe_unused]] auto renderer_start = std::chrono::high_resolution_clock::now();
+                 frame_log('S', (uint32_t)task_action->task.t.data_ptr, (uint32_t)task_action->task.t.ucode);
++                task_continues_frame = !task_action->ends_frame;
+                 renderer_context->send_dl(&task_action->task);
++                task_continues_frame = false;
+                 [[maybe_unused]] auto renderer_end = std::chrono::high_resolution_clock::now();
+ 
+                 gfx_tasks_done++;
+@@ -683,7 +697,8 @@ void ultramodern::submit_rsp_task(RDRAM_ARG PTR(OSTask) task_) {
+     if (task->t.type == M_GFXTASK) {
+         frame_log('T', (uint32_t)task->t.data_ptr, (uint32_t)task->t.ucode, (uint32_t)task->t.flags,
+             swap_pending_tasks != nullptr ? swap_pending_tasks() : 0);
+-        events_context.action_queue.enqueue(SpTaskAction{ *task });
++        bool ends_frame = frame_end_detector == nullptr || frame_end_detector(PASS_RDRAM (uint32_t)task_);
++        events_context.action_queue.enqueue(SpTaskAction{ *task, ends_frame });
+     }
+     // Set all other tasks as the RSP task
+     else {

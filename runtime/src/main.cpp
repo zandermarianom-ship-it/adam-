@@ -276,9 +276,30 @@ static uint32_t gfx_tasks_in_flight() {
     return pending > 0 ? (uint32_t)pending : 0;
 }
 
+// Smooth 60 FPS (Settings -> General): RT64's frame interpolation (Framerate: Display) draws in-between pictures from
+// two game frames. RT64 takes each graphics task as a frame, but this game draws a frame in several tasks (background,
+// 3D, HUD, ... each submitted by func_800B666C), so its in-between pictures held only the last task's drawing: the
+// 3D vanished (the reason Framerate was kept at Original). With this on, the tasks before a frame's last one are kept
+// in the same RT64 workload (runtime\patches\*-workload-frames.patch). The last one is the one func_800B666C
+// submits with flag 1 (swap to this framebuffer after it): the flag is in the game's scheduler task (OSScTask: flags
+// at +0x8, the OSTask the runtime gets at +0x10).
+namespace adam {
+    bool get_smooth_enabled(); // config.cpp
+}
+static std::atomic<bool> group_frames = false;
+
+static bool task_ends_frame(uint8_t* rdram, uint32_t task_address) {
+    if (!group_frames.load(std::memory_order_relaxed)) {
+        return true;
+    }
+    uint32_t sc_flags = *(const uint32_t*)(rdram + ((task_address - 0x10 + 0x8) & 0x7FFFFF));
+    return (sc_flags & 1) != 0;
+}
+
 static std::unique_ptr<ultramodern::renderer::RendererContext> create_render_context(uint8_t* rdram, ultramodern::renderer::WindowHandle window_handle, bool developer_mode) {
     dump_rdram = rdram;
     ultramodern::set_swap_gate(gfx_tasks_in_flight);
+    ultramodern::set_frame_end_detector(task_ends_frame);
     // SkipBuffering is RT64's default, which the 30 fps pacing (tag pacing-30fps) was measured with.
     return recompui::renderer::create_render_context(rdram, window_handle, ultramodern::renderer::PresentationMode::SkipBuffering, developer_mode);
 }
@@ -556,12 +577,16 @@ static void check_aspect_ratio() {
     AspectRatio wanted = gameplay ? chosen : AspectRatio::Original;
     adam::widescreen::set_full_screen(wanted != AspectRatio::Original);
     ultramodern::renderer::GraphicsConfig config = ultramodern::renderer::get_graphics_config();
-    // Framerate is always the game's own: RT64's frame interpolation (Framerate: Display / Manual) needs matrix tags
-    // the game doesn't have, and its made-up frames had no 3D at all (fights flickered: 3D in one frame of three).
-    if (config.rr_option != ultramodern::renderer::RefreshRate::Original) {
-        config.rr_option = ultramodern::renderer::RefreshRate::Original;
+    // Framerate follows Smooth 60 FPS (General tab), not the Graphics tab: Display (interpolated) with the game's
+    // frames grouped (task_ends_frame), else the game's own. Interpolation without the grouping had no 3D in its
+    // made-up frames (fights flickered: 3D in one frame of three).
+    bool smooth = adam::get_smooth_enabled();
+    group_frames = smooth;
+    auto wanted_rate = smooth ? ultramodern::renderer::RefreshRate::Display : ultramodern::renderer::RefreshRate::Original;
+    if (config.rr_option != wanted_rate) {
+        config.rr_option = wanted_rate;
         ultramodern::renderer::set_graphics_config(config);
-        printf("[framerate] kept at Original (interpolation drops the 3D)\n");
+        printf("[framerate] %s\n", smooth ? "smooth (interpolated to the display)" : "the game's own");
     }
     if (config.ar_option != wanted) {
         config.ar_option = wanted;

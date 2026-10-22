@@ -95,6 +95,13 @@ namespace adam {
 
     const std::string fps60_option = "fps60";
 
+    const std::string smooth_option = "smooth60";
+
+    // Smooth 60 FPS on/off from the General tab (main.cpp: RT64's frame interpolation over whole game frames).
+    bool get_smooth_enabled() {
+        return std::get<bool>(recompui::config::get_general_config().get_option_value(smooth_option));
+    }
+
     // 60 FPS on/off from the General tab (framerate.cpp).
     bool get_60fps_enabled() {
         // Taken out of the menu (2026-10-22): much of the game counts frames, not time (attacks, walking), so at 60
@@ -137,6 +144,10 @@ namespace adam {
         general_config.add_bool_option(subtitles_option, "English Subtitles",
             "Shows an English translation at the bottom of the screen while a character speaks.",
             true);
+        general_config.add_bool_option(smooth_option, "Smooth 60 FPS (experimental)",
+            "Shows the game at your screen's refresh rate by drawing in-between pictures, while the game itself keeps "
+            "its own speed. Moving things may smear or jump in places; switch it off if something looks wrong.",
+            false);
         general_config.add_bool_option(steady_3d_option, "Steady 3D",
             "Stops the 3D scenes (the Evas, Angels, 3D cutscenes) flickering on some PCs: a frame is only shown once "
             "it's fully drawn. Switch it off if the picture stutters.",

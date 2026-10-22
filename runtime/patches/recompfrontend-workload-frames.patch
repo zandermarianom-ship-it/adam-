@@ -1,0 +1,16 @@
+diff --git a/recompui/src/renderer/rt64_render_context.cpp b/recompui/src/renderer/rt64_render_context.cpp
+index 7c42973..48027f1 100644
+--- a/recompui/src/renderer/rt64_render_context.cpp
++++ b/recompui/src/renderer/rt64_render_context.cpp
+@@ -351,7 +351,11 @@ void renderer::RT64Context::send_dl(const OSTask* task) {
+     check_texture_pack_actions();
+     app->state->rsp->reset();
+     app->interpreter->loadUCodeGBI(task->t.ucode & 0x3FFFFFF, task->t.ucode_data & 0x3FFFFFF, true);
++    // adam: a task that isn't its frame's last goes into the same RT64 workload as the next (ultramodern's
++    // set_frame_end_detector), so frame interpolation sees whole frames.
++    app->state->deferFullSync = ultramodern::current_task_continues_frame();
+     app->processDisplayLists(app->core.RDRAM, task->t.data_ptr & 0x3FFFFFF, 0, true);
++    app->state->deferFullSync = false;
+ }
+ 
+ void renderer::RT64Context::send_dummy_workload(uint32_t fb_address) {
