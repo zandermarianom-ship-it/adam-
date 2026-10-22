@@ -16,6 +16,25 @@ index 6255872..73980b8 100644
              state->fullSync();
              state->dpInterrupt();
          }
+diff --git a/src/hle/rt64_present_queue.cpp b/src/hle/rt64_present_queue.cpp
+index 7de5b69..29b3914 100644
+--- a/src/hle/rt64_present_queue.cpp
++++ b/src/hle/rt64_present_queue.cpp
+@@ -191,7 +191,13 @@ namespace RT64 {
+                 if (presentFb->interpolationEnabled) {
+                     framesToPresent = frameCounters.count;
+                 }
+-                else {
++
++                // adam: the first frame shows the render target manager's target, which the workload queue destroys
++                // when the size changes (aspect ratio, resolution): hold the workload mutex for it while interpolating
++                // too (the workload queue takes it to destroy them), else the target could be freed mid-draw (a crash
++                // in the driver when the game switched aspect ratio). Not with MSAA, where the first frame waits for
++                // an interpolated target the workload queue renders under this mutex.
++                if (!presentFb->interpolationEnabled || !usingMSAA) {
+                     lockedWorkloadMutex = true;
+                     ext.sharedResources->workloadMutex.lock();
+                 }
 diff --git a/src/hle/rt64_state.h b/src/hle/rt64_state.h
 index 4f10425..cd58639 100644
 --- a/src/hle/rt64_state.h
@@ -33,10 +52,19 @@ index 4f10425..cd58639 100644
          void listProcessBegin();
          void listProcessEnd();
 diff --git a/src/hle/rt64_workload_queue.cpp b/src/hle/rt64_workload_queue.cpp
-index 5a331aa..abf39f1 100644
+index 5a331aa..5618030 100644
 --- a/src/hle/rt64_workload_queue.cpp
 +++ b/src/hle/rt64_workload_queue.cpp
-@@ -1048,6 +1048,10 @@ namespace RT64 {
+@@ -263,6 +263,8 @@ namespace RT64 {
+                 });
+             }
+ 
++            // adam: also under the workload mutex, which the present queue holds while it shows a target.
++            std::scoped_lock<std::mutex> workloadLock(ext.sharedResources->workloadMutex);
+             std::scoped_lock<std::mutex> managerLock(ext.sharedResources->managerMutex);
+             FramebufferManager &fbManager = ext.sharedResources->framebufferManager;
+             RenderTargetManager &targetManager = ext.sharedResources->renderTargetManager;
+@@ -1048,6 +1050,10 @@ namespace RT64 {
                  const bool usesHDR = ext.sharedResources->renderTargetManager.usesHDR;
                  uint32_t requiredFrames = (usingMSAA && generateInterpolatedFrames) ? displayFrames : (displayFrames - 1);
                  if ((requiredFrames > 0) && (interpolatedTargets.size() < requiredFrames)) {
