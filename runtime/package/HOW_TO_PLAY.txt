@@ -32,6 +32,7 @@ Extras:
   Settings -> General -> Reset Game: restarts the game (like the console's reset).
   Settings -> General -> English Game Text: the game's captions, briefings, cutscene lines, mission titles, controls
     screens and menu prompts in English (on by default). The staff credits are still Japanese.
+  Settings -> General -> Steady 3D: try it if the 3D scenes flicker (off by default; on some PCs it stops the sound).
   Settings -> General -> English Subtitles: an English line at the bottom of the screen while a character speaks
     (on by default). Not every voice clip has one yet. To correct or add lines, put a subtitles_en.txt in the data
     folder (format: see the project's runtime\subtitles folder).

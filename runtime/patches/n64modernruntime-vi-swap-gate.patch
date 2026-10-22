@@ -1,24 +1,26 @@
 diff --git a/ultramodern/include/ultramodern/ultramodern.hpp b/ultramodern/include/ultramodern/ultramodern.hpp
-index 2d368d8..91c84f3 100644
+index 2d368d8..231d280 100644
 --- a/ultramodern/include/ultramodern/ultramodern.hpp
 +++ b/ultramodern/include/ultramodern/ultramodern.hpp
-@@ -117,6 +117,11 @@ uint32_t get_target_framerate(uint32_t original);
+@@ -117,6 +117,13 @@ uint32_t get_target_framerate(uint32_t original);
  uint32_t get_display_refresh_rate();
  float get_resolution_scale();
  void trigger_config_action();
-+// adam: a framebuffer swap is applied at a VI only once the graphics tasks that were in flight when the game called
-+// osViSwapBuffer (pending_tasks() = the game's own count at that moment) are done, for at most one normal-speed VI
-+// (more held the game's next frame: no sound at all). A VI could otherwise land between the swap and the frame's last tasks reaching the
-+// renderer, which then showed half-drawn frames (3D scene flickering at 1x, HUD missing or black at 4x+).
++// adam: while fast-forwarding (and at normal speed too if set_swap_gate_always(true)), a framebuffer swap is applied
++// at a VI only once the graphics tasks that were in flight when the game called osViSwapBuffer (pending_tasks() = the
++// game's own count at that moment) are done, for at most one normal-speed VI. A VI could otherwise land between the
++// swap and the frame's last tasks reaching the renderer, which showed half-drawn frames (HUD missing or black at 4x+,
++// the 3D scene flickering at 1x on some PCs). At 1x it's a setting: on one PC it also left the game without sound.
 +void set_swap_gate(uint32_t (*pending_tasks)());
++void set_swap_gate_always(bool always);
  
  // Audio
  void init_audio();
 diff --git a/ultramodern/src/events.cpp b/ultramodern/src/events.cpp
-index ca1a6d9..ad65e95 100644
+index ca1a6d9..fa6dccd 100644
 --- a/ultramodern/src/events.cpp
 +++ b/ultramodern/src/events.cpp
-@@ -178,6 +178,18 @@ extern "C" void osViSetEvent(RDRAM_ARG PTR(OSMesgQueue) mq_, OSMesg msg, u32 ret
+@@ -178,6 +178,24 @@ extern "C" void osViSetEvent(RDRAM_ARG PTR(OSMesgQueue) mq_, OSMesg msg, u32 ret
  
  uint64_t total_vis = 0;
  
@@ -34,22 +36,28 @@ index ca1a6d9..ad65e95 100644
 +    swap_pending_tasks = pending_tasks;
 +}
 +
++static std::atomic<bool> swap_gate_always = false;
++
++void ultramodern::set_swap_gate_always(bool always) {
++    swap_gate_always = always;
++}
++
  
  extern std::atomic_bool exited;
  extern moodycamel::LightweightSemaphore graphics_shutdown_ready;
-@@ -244,7 +256,28 @@ void vi_thread_func() {
+@@ -244,7 +262,28 @@ void vi_thread_func() {
          events_context.action_queue.enqueue(ScreenUpdateAction{ events_context.vi.regs });
  
          // Update VI registers and swap VI modes.
 -        events_context.vi.update_vi();
-+        // adam: keep showing the current framebuffer until the swapped-in one is fully drawn, for at most one
-+        // normal-speed VI (vi_multiplier VIs), so a miscount can never hold the game.
++        // adam: while fast-forwarding (or always, if set), keep showing the current framebuffer until the swapped-in one
++        // is fully drawn, for at most one normal-speed VI (vi_multiplier VIs), so a miscount can never hold the game.
 +        PTR(void) deferred_framebuffer = NULLPTR;
 +        {
 +            std::lock_guard lock{ events_context.message_mutex };
 +            ViState* next_state = events_context.vi.get_next_state();
 +            ViState* cur_state = events_context.vi.get_cur_state();
-+            if (swap_pending_tasks != nullptr && ultramodern::is_game_started() &&
++            if ((vi_multiplier > 1 || swap_gate_always.load()) && swap_pending_tasks != nullptr && ultramodern::is_game_started() &&
 +                next_state->framebuffer != cur_state->framebuffer && gfx_tasks_done.load() < swap_tasks_needed &&
 +                deferred_vis < vi_multiplier) {
 +                deferred_framebuffer = next_state->framebuffer;
@@ -67,7 +75,7 @@ index ca1a6d9..ad65e95 100644
  
          // If the game has started, handle sending VI and AI events.
          if (ultramodern::is_game_started()) {
-@@ -390,6 +423,7 @@ void gfx_thread_func(uint8_t* rdram, moodycamel::LightweightSemaphore* thread_re
+@@ -390,6 +429,7 @@ void gfx_thread_func(uint8_t* rdram, moodycamel::LightweightSemaphore* thread_re
                  renderer_context->send_dl(&task_action->task);
                  [[maybe_unused]] auto renderer_end = std::chrono::high_resolution_clock::now();
  
@@ -75,7 +83,7 @@ index ca1a6d9..ad65e95 100644
                  dp_complete();
                  // TODO hook the parsed event up to the actual parsing point when a callback is added to RT64.
                  ultramodern::extensions::on_displaylist_parsed(displaylist);
-@@ -474,6 +508,9 @@ void set_dummy_vi(bool odd) {
+@@ -474,6 +514,9 @@ void set_dummy_vi(bool odd) {
  extern "C" void osViSwapBuffer(RDRAM_ARG PTR(void) frameBufPtr) {
      std::lock_guard lock{ events_context.message_mutex };
      events_context.vi.get_next_state()->framebuffer = frameBufPtr;

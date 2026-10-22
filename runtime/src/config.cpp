@@ -86,6 +86,13 @@ namespace adam {
         return std::get<bool>(recompui::config::get_general_config().get_option_value(texture_dump_option));
     }
 
+    const std::string steady_3d_option = "steady_3d";
+
+    // Steady 3D on/off from the General tab (main.cpp: the swap gate at normal speed too).
+    bool get_steady_3d_enabled() {
+        return std::get<bool>(recompui::config::get_general_config().get_option_value(steady_3d_option));
+    }
+
     const std::string game_text_option = "game_text";
 
     // The game's own text (captions, briefings) in English on/off from the General tab (game_text.cpp).
@@ -121,6 +128,10 @@ namespace adam {
         general_config.add_bool_option(subtitles_option, "English Subtitles",
             "Shows an English translation at the bottom of the screen while a character speaks.",
             true);
+        general_config.add_bool_option(steady_3d_option, "Steady 3D",
+            "Try this if the 3D scenes (the Evas, Angels, 3D cutscenes) flicker: a frame is only shown once it's fully "
+            "drawn. Off by default: on some PCs it stops the sound.",
+            false);
         general_config.add_bool_option(texture_dump_option, "Save Textures",
             "For making HD texture packs: saves every texture the game draws as a PNG in the texture_dump folder inside "
             "the data folder, once each. Play through the parts you want covered, then switch it off. "
