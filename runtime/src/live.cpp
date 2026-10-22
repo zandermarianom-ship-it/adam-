@@ -66,6 +66,11 @@ namespace adam::game_images {
     const std::vector<adam::game_text::Wrapped>& wrapped();
 }
 
+// widescreen.cpp: the scissor emitter's wrapper (no black frame in widescreen).
+namespace adam::widescreen {
+    const std::vector<adam::game_text::Wrapped>& wrapped();
+}
+
 namespace {
     constexpr uint32_t ENTRY_VRAM = 0x80096400;
     constexpr uint32_t BOOT_ROM = 0x1000;
@@ -394,6 +399,9 @@ namespace {
         // string and picture.
         std::vector<adam::game_text::Wrapped> wrappers = adam::game_text::wrapped();
         for (const adam::game_text::Wrapped& w : adam::game_images::wrapped()) {
+            wrappers.push_back(w);
+        }
+        for (const adam::game_text::Wrapped& w : adam::widescreen::wrapped()) {
             wrappers.push_back(w);
         }
         size_t wrapped = 0;

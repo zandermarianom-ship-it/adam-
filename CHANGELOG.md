@@ -14,6 +14,11 @@ date (`adam-<date>-<commit>.zip`).
   mission, the file and reset prompts, briefing and results labels, the MAGI vote panels, mission-failed screens,
   and the Angel and weapon names (116 pictures), redrawn in each picture's own colours. Same switch. The staff
   credits are still Japanese.
+- **Fixed: 3D flickering in fights and 3D cutscenes**: with Settings -> Graphics -> Framerate on Display or Manual,
+  the renderer made up in-between frames, and those had no 3D at all (the Evas and the city showed in one frame of
+  three). The game now always runs at its own framerate, whatever that setting says.
+- **No black frame in widescreen**: with a wide aspect ratio, mission battles fill the whole screen instead of keeping
+  the game's 16-pixel black frame (which ended up as black bars on all four sides).
 - **Steady 3D** (Settings -> General, on by default): fixes 3D scenes that flicker (the Evas, Angels and 3D cutscenes
   flashing on and off rapidly). The screen could show a new frame before its 3D part had been drawn; now the last
   complete frame stays up until the new one is done. Only the picture waits, not the game: the first versions of this

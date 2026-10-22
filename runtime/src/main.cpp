@@ -529,6 +529,10 @@ static void write_state_file() {
 // the launcher - the renderer gets Original, since those scenes are drawn for 4:3 (2D backgrounds and sprites don't fill a
 // wider screen). The saved setting is never changed: only the copy the renderer uses (ultramodern's graphics config, which
 // the Graphics tab rebuilds from the saved values whenever it applies a change - then this corrects it again).
+namespace adam::widescreen {
+    void set_full_screen(bool on); // widescreen.cpp
+}
+
 static void check_aspect_ratio() {
     using ultramodern::renderer::AspectRatio;
     static bool ready = false;
@@ -545,7 +549,15 @@ static void check_aspect_ratio() {
         recompui::config::get_graphics_config().get_option_value(recompui::config::graphics::options::ar_option)));
     bool gameplay = ultramodern::is_game_started() && adam::rewind::in_gameplay();
     AspectRatio wanted = gameplay ? chosen : AspectRatio::Original;
+    adam::widescreen::set_full_screen(wanted != AspectRatio::Original);
     ultramodern::renderer::GraphicsConfig config = ultramodern::renderer::get_graphics_config();
+    // Framerate is always the game's own: RT64's frame interpolation (Framerate: Display / Manual) needs matrix tags
+    // the game doesn't have, and its made-up frames had no 3D at all (fights flickered: 3D in one frame of three).
+    if (config.rr_option != ultramodern::renderer::RefreshRate::Original) {
+        config.rr_option = ultramodern::renderer::RefreshRate::Original;
+        ultramodern::renderer::set_graphics_config(config);
+        printf("[framerate] kept at Original (interpolation drops the 3D)\n");
+    }
     if (config.ar_option != wanted) {
         config.ar_option = wanted;
         ultramodern::renderer::set_graphics_config(config);
