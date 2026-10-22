@@ -89,3 +89,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "could not create the release" }
           gh release edit latest-build --draft=false
           if ($LASTEXITCODE -ne 0) { throw "could not publish the release" }
+          # The symbols beside it (for crash addresses; not needed to play).
+          if (Test-Path runtime\build-live\adam.pdb) {
+            Compress-Archive -Path runtime\build-live\adam.pdb -DestinationPath symbols-build$env:GITHUB_RUN_NUMBER.zip
+            gh release upload latest-build symbols-build$env:GITHUB_RUN_NUMBER.zip
+          }
