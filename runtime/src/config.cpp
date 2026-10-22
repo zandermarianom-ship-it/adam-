@@ -93,6 +93,13 @@ namespace adam {
         return std::get<bool>(recompui::config::get_general_config().get_option_value(steady_3d_option));
     }
 
+    const std::string fps60_option = "fps60";
+
+    // 60 FPS on/off from the General tab (framerate.cpp).
+    bool get_60fps_enabled() {
+        return std::get<bool>(recompui::config::get_general_config().get_option_value(fps60_option));
+    }
+
     const std::string game_text_option = "game_text";
 
     // The game's own text (captions, briefings) in English on/off from the General tab (game_text.cpp).
@@ -120,6 +127,11 @@ namespace adam {
             "Hold the Rewind button (Controls tab; default: left stick click, keyboard Backspace) during missions to run the game backwards, up to 10 seconds. "
             "Sound is muted meanwhile. Not available in menus and cutscenes.",
             true);
+        general_config.add_bool_option(fps60_option, "60 FPS (experimental)",
+            "Runs the game at 60 frames per second instead of its own 20-30. The game scales its movement and timers by "
+            "its frame rate, so it should play at the normal speed, but some parts may run too fast or look odd. "
+            "Switch it off if something misbehaves.",
+            false);
         general_config.add_bool_option(game_text_option, "English Game Text",
             "Shows the game's own text (mission captions, briefings, cutscene lines, mission titles, controls screens, "
             "menu prompts) in English instead of Japanese. "

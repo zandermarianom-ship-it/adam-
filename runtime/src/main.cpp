@@ -106,6 +106,11 @@ namespace adam::game_images {
     void update();
 }
 
+// framerate.cpp: 60 FPS.
+namespace adam::framerate {
+    void update();
+}
+
 // texture_packs.cpp: HD texture packs (.rtz mods) and saving textures to make them.
 namespace adam::texture_packs {
     void register_content_types();
@@ -609,6 +614,7 @@ static void update_gfx(ultramodern::gfx_callbacks_t::gfx_data_t) {
     adam::subtitles::update();
     adam::game_text::update();
     adam::game_images::update();
+    adam::framerate::update();
     ultramodern::set_swap_gate_always(adam::get_steady_3d_enabled());
     adam::texture_packs::update();
 }
