@@ -259,7 +259,8 @@ void adam_debug_wait_while_paused() {
 // A framebuffer swap is applied at a VI only once the graphics tasks in flight when the game asked for it are done
 // (runtime\patches\n64modernruntime-vi-swap-gate.patch). Without this, at 4x the battle's HUD flickered and frames
 // showed black; at normal speed (first only gated while fast-forwarding) the 3D scenes flickered on some PCs: a VI
-// showed the next framebuffer before its 3D task had reached the renderer. The count is the game's pending counter 0x8016D060 (+1 when func_800B666C submits a task, -1
+// showed the next framebuffer before its 3D task had reached the renderer. At most one normal-speed VI: holding a
+// swap for three VIs at 1x (the game swaps every two) left the game without sound. The count is the game's pending counter 0x8016D060 (+1 when func_800B666C submits a task, -1
 // when the task-done thread sees it finish). Waiting for it to reach 0 instead froze the game at 8x: by then the next
 // frame's tasks were already queued, and the game only runs them after the swap.
 static uint32_t gfx_tasks_in_flight() {

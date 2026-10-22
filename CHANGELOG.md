@@ -16,7 +16,7 @@ date (`adam-<date>-<commit>.zip`).
   credits are still Japanese.
 - **Fixed: 3D scenes flickering** (the Evas, Angels and 3D cutscenes flashing on and off rapidly). The screen could
   show a new frame before its 3D part had been drawn; a frame is now only shown once it's complete (this was already
-  done while fast-forwarding).
+  done while fast-forwarding). A first version of this fix (one download) left the game without sound.
 - **English subtitles** for the voice clips: while a character speaks, an English line shows at the bottom of the
   screen. On/off in Settings -> General (on by default). 50 of the game's 307 voice clips have a line so far (the
   spoken lines; shouts and grunts don't get one); some are marked as unsure in `runtime\subtitles\voice_lines.tsv`
