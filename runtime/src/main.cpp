@@ -360,6 +360,43 @@ static void check_ram_dump_key() {
     was_down = down;
 }
 
+// F8 records 10 seconds of the frame log (runtime\patches\n64modernruntime-vi-swap-gate.patch: graphics tasks
+// submitted / started / finished, framebuffer swaps, what each VI showed) to frame_log.txt next to adam.exe, for
+// finding display problems (the flickering 3D) on a player's PC.
+static void check_frame_log_key() {
+    static bool was_down = false;
+    static double stop_at = -1;
+    bool down = (GetAsyncKeyState(VK_F8) & 0x8000) != 0 && debug_keys_active();
+    if (down && !was_down && stop_at < 0) {
+        ultramodern::frame_log_take();
+        ultramodern::frame_log_enable(true);
+        stop_at = game_seconds() + 10.0;
+        last_dump_name = "recording frame_log.txt...";
+    }
+    was_down = down;
+    if (stop_at >= 0 && game_seconds() >= stop_at) {
+        ultramodern::frame_log_enable(false);
+        stop_at = -1;
+        std::vector<ultramodern::FrameLogEntry> entries = ultramodern::frame_log_take();
+        char exe_path[MAX_PATH];
+        GetModuleFileNameA(nullptr, exe_path, MAX_PATH);
+        std::filesystem::path path = std::filesystem::path{ exe_path }.parent_path() / "frame_log.txt";
+        FILE* f = fopen(path.string().c_str(), "w");
+        if (f != nullptr) {
+            uint32_t mode = dump_rdram == nullptr ? 0 : *(const uint16_t*)(dump_rdram + (0x0D5114 ^ 2));
+            fprintf(f, "# adam frame log: %zu entries, game_mode %u, steady_3d %d\n", entries.size(), mode,
+                adam::get_steady_3d_enabled() ? 1 : 0);
+            fprintf(f, "# T submit dl ucode flags pending | S start dl ucode | E end dl done | W swap fb pending done | V vi shown presented hold done\n");
+            for (const ultramodern::FrameLogEntry& e : entries) {
+                fprintf(f, "%llu %c %08X %08X %08X %08X\n", (unsigned long long)e.us, e.kind, e.a, e.b, e.c, e.d);
+            }
+            fclose(f);
+            last_dump_name = "frame_log.txt written";
+        }
+        printf("[framelog] wrote %zu entries to %s\n", entries.size(), path.string().c_str());
+    }
+}
+
 // --- Window -------------------------------------------------------------------------------------
 
 // RecompFrontend's UI reads this global (as in Banjo: Recompiled).
@@ -551,6 +588,7 @@ static void update_gfx(ultramodern::gfx_callbacks_t::gfx_data_t) {
     check_fast_forward();
     check_pause_key();
     check_ram_dump_key();
+    check_frame_log_key();
     update_title();
     write_state_file();
     check_aspect_ratio();

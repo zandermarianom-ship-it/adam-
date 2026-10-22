@@ -1,8 +1,16 @@
 diff --git a/ultramodern/include/ultramodern/ultramodern.hpp b/ultramodern/include/ultramodern/ultramodern.hpp
-index 2d368d8..d702d6f 100644
+index 2d368d8..c42e5a4 100644
 --- a/ultramodern/include/ultramodern/ultramodern.hpp
 +++ b/ultramodern/include/ultramodern/ultramodern.hpp
-@@ -117,6 +117,13 @@ uint32_t get_target_framerate(uint32_t original);
+@@ -2,6 +2,7 @@
+ #define __ultramodern_HPP__
+ 
+ #include <thread>
++#include <vector>
+ #include <cassert>
+ #include <stdexcept>
+ #include <span>
+@@ -117,6 +118,22 @@ uint32_t get_target_framerate(uint32_t original);
  uint32_t get_display_refresh_rate();
  float get_resolution_scale();
  void trigger_config_action();
@@ -13,14 +21,23 @@ index 2d368d8..d702d6f 100644
 +// set_swap_gate_always(true) (else the 3D scenes flickered on some PCs).
 +void set_swap_gate(uint32_t (*pending_tasks)());
 +void set_swap_gate_always(bool always);
++// adam: frame log for finding display problems (main.cpp's F8): graphics tasks submitted / started / finished,
++// framebuffer swaps and what each VI put on screen, with times. Recorded only while enabled.
++struct FrameLogEntry {
++    uint64_t us;    // microseconds since the game started
++    char kind;      // 'T' gfx task submitted, 'S' started, 'E' finished, 'W' osViSwapBuffer, 'V' VI screen update
++    uint32_t a, b, c, d;
++};
++void frame_log_enable(bool enable);
++std::vector<FrameLogEntry> frame_log_take();
  
  // Audio
  void init_audio();
 diff --git a/ultramodern/src/events.cpp b/ultramodern/src/events.cpp
-index ca1a6d9..353f88f 100644
+index ca1a6d9..7c4433c 100644
 --- a/ultramodern/src/events.cpp
 +++ b/ultramodern/src/events.cpp
-@@ -178,6 +178,27 @@ extern "C" void osViSetEvent(RDRAM_ARG PTR(OSMesgQueue) mq_, OSMesg msg, u32 ret
+@@ -178,6 +178,54 @@ extern "C" void osViSetEvent(RDRAM_ARG PTR(OSMesgQueue) mq_, OSMesg msg, u32 ret
  
  uint64_t total_vis = 0;
  
@@ -40,6 +57,33 @@ index ca1a6d9..353f88f 100644
 +    swap_gate_always = always;
 +}
 +
++static std::atomic<bool> frame_log_on = false;
++static std::mutex frame_log_mutex;
++static std::vector<ultramodern::FrameLogEntry> frame_log_entries;
++
++static void frame_log(char kind, uint32_t a, uint32_t b = 0, uint32_t c = 0, uint32_t d = 0) {
++    if (!frame_log_on.load(std::memory_order_relaxed)) {
++        return;
++    }
++    uint64_t us = (uint64_t)std::chrono::duration_cast<std::chrono::microseconds>(
++        std::chrono::high_resolution_clock::now() - ultramodern::get_start()).count();
++    std::lock_guard lock{ frame_log_mutex };
++    if (frame_log_entries.size() < 400000) {
++        frame_log_entries.push_back({ us, kind, a, b, c, d });
++    }
++}
++
++void ultramodern::frame_log_enable(bool enable) {
++    frame_log_on = enable;
++}
++
++std::vector<ultramodern::FrameLogEntry> ultramodern::frame_log_take() {
++    std::lock_guard lock{ frame_log_mutex };
++    std::vector<ultramodern::FrameLogEntry> out;
++    out.swap(frame_log_entries);
++    return out;
++}
++
 +void ultramodern::set_swap_gate(uint32_t (*pending_tasks)()) {
 +    swap_pending_tasks = pending_tasks;
 +}
@@ -48,7 +92,7 @@ index ca1a6d9..353f88f 100644
  
  extern std::atomic_bool exited;
  extern moodycamel::LightweightSemaphore graphics_shutdown_ready;
-@@ -241,10 +262,44 @@ void vi_thread_func() {
+@@ -241,10 +289,46 @@ void vi_thread_func() {
  
          // Queue a screen update for the graphics thread with the current VI register state.
          // Doing this before the VI update is equivalent to updating the screen after the previous frame's scanout finished.
@@ -83,6 +127,8 @@ index ca1a6d9..353f88f 100644
 +                have_presented = true;
 +                held_vis = 0;
 +            }
++            frame_log('V', (uint32_t)events_context.vi.regs.VI_ORIGIN_REG, (uint32_t)present.VI_ORIGIN_REG, hold ? 1 : 0,
++                (uint32_t)gfx_tasks_done.load());
 +            events_context.action_queue.enqueue(ScreenUpdateAction{ present });
 +        }
  
@@ -95,18 +141,24 @@ index ca1a6d9..353f88f 100644
  
          // If the game has started, handle sending VI and AI events.
          if (ultramodern::is_game_started()) {
-@@ -390,6 +445,7 @@ void gfx_thread_func(uint8_t* rdram, moodycamel::LightweightSemaphore* thread_re
+@@ -387,9 +471,12 @@ void gfx_thread_func(uint8_t* rdram, moodycamel::LightweightSemaphore* thread_re
+                 ultramodern::extensions::on_displaylist_submitted(displaylist);
+ 
+                 [[maybe_unused]] auto renderer_start = std::chrono::high_resolution_clock::now();
++                frame_log('S', (uint32_t)task_action->task.t.data_ptr, (uint32_t)task_action->task.t.ucode);
                  renderer_context->send_dl(&task_action->task);
                  [[maybe_unused]] auto renderer_end = std::chrono::high_resolution_clock::now();
  
 +                gfx_tasks_done++;
++                frame_log('E', (uint32_t)task_action->task.t.data_ptr, (uint32_t)gfx_tasks_done.load());
                  dp_complete();
                  // TODO hook the parsed event up to the actual parsing point when a callback is added to RT64.
                  ultramodern::extensions::on_displaylist_parsed(displaylist);
-@@ -474,6 +530,20 @@ void set_dummy_vi(bool odd) {
+@@ -474,6 +561,21 @@ void set_dummy_vi(bool odd) {
  extern "C" void osViSwapBuffer(RDRAM_ARG PTR(void) frameBufPtr) {
      std::lock_guard lock{ events_context.message_mutex };
      events_context.vi.get_next_state()->framebuffer = frameBufPtr;
++    frame_log('W', (uint32_t)frameBufPtr, swap_pending_tasks != nullptr ? swap_pending_tasks() : 0, (uint32_t)gfx_tasks_done.load());
 +    if (swap_pending_tasks != nullptr) {
 +        uint64_t needed = gfx_tasks_done.load() + swap_pending_tasks();
 +        bool found = false;
@@ -124,3 +176,12 @@ index ca1a6d9..353f88f 100644
  }
  
  extern "C" void osViSetMode(RDRAM_ARG PTR(OSViMode) mode_) {
+@@ -579,6 +681,8 @@ void ultramodern::submit_rsp_task(RDRAM_ARG PTR(OSTask) task_) {
+ 
+     // Send gfx tasks to the graphics action queue
+     if (task->t.type == M_GFXTASK) {
++        frame_log('T', (uint32_t)task->t.data_ptr, (uint32_t)task->t.ucode, (uint32_t)task->t.flags,
++            swap_pending_tasks != nullptr ? swap_pending_tasks() : 0);
+         events_context.action_queue.enqueue(SpTaskAction{ *task });
+     }
+     // Set all other tasks as the RSP task
