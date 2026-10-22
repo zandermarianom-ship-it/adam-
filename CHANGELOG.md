@@ -14,10 +14,10 @@ date (`adam-<date>-<commit>.zip`).
   mission, the file and reset prompts, briefing and results labels, the MAGI vote panels, mission-failed screens,
   and the Angel and weapon names (116 pictures), redrawn in each picture's own colours. Same switch. The staff
   credits are still Japanese.
-- **Steady 3D** (Settings -> General, off by default): for 3D scenes that flicker (the Evas, Angels and 3D cutscenes
-  flashing on and off rapidly). The screen could show a new frame before its 3D part had been drawn; with Steady 3D a
-  frame is only shown once it's complete (as was already done while fast-forwarding). It's a setting because on one
-  PC it also left the game without sound (two downloads had it always on).
+- **Steady 3D** (Settings -> General, on by default): fixes 3D scenes that flicker (the Evas, Angels and 3D cutscenes
+  flashing on and off rapidly). The screen could show a new frame before its 3D part had been drawn; now the last
+  complete frame stays up until the new one is done. Only the picture waits, not the game: the first versions of this
+  fix (three downloads) held the game itself, which cut the sound and froze a cutscene on one PC.
 - **English subtitles** for the voice clips: while a character speaks, an English line shows at the bottom of the
   screen. On/off in Settings -> General (on by default). 50 of the game's 307 voice clips have a line so far (the
   spoken lines; shouts and grunts don't get one); some are marked as unsure in `runtime\subtitles\voice_lines.tsv`

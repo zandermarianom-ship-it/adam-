@@ -129,9 +129,9 @@ namespace adam {
             "Shows an English translation at the bottom of the screen while a character speaks.",
             true);
         general_config.add_bool_option(steady_3d_option, "Steady 3D",
-            "Try this if the 3D scenes (the Evas, Angels, 3D cutscenes) flicker: a frame is only shown once it's fully "
-            "drawn. Off by default: on some PCs it stops the sound.",
-            false);
+            "Stops the 3D scenes (the Evas, Angels, 3D cutscenes) flickering on some PCs: a frame is only shown once "
+            "it's fully drawn. Switch it off if the picture stutters.",
+            true);
         general_config.add_bool_option(texture_dump_option, "Save Textures",
             "For making HD texture packs: saves every texture the game draws as a PNG in the texture_dump folder inside "
             "the data folder, once each. Play through the parts you want covered, then switch it off. "
