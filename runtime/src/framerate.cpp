@@ -14,6 +14,7 @@
 // (0x80149FC0, counted by the VI thread, func_800B5BF4) when it starts, and func_800A93AC, an empty function it calls
 // right where its own wait would be, waits for one VI if none has passed since.
 #include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <cstdio>
 #include <vector>
@@ -44,6 +45,8 @@ namespace {
     recomp_func_t* original_frame = nullptr;    // func_800A8B34
     recomp_func_t* original_after_wait = nullptr; // func_800A93AC (empty)
     uint32_t frame_start = 0;                   // VI count when the current frame began (game thread only)
+    // For adam_log.txt every 5 s (update()): game frames, VIs, waits we added.
+    std::atomic<uint32_t> stat_frames{ 0 }, stat_waits{ 0 };
 
     gpr addr(uint32_t a) {
         return (gpr)(int32_t)a;
@@ -63,6 +66,7 @@ namespace {
     // func_800A8B34: one game frame
     void frame(uint8_t* rdram, recomp_context* ctx) {
         frame_start = (uint32_t)MEM_W(0, addr(VI_COUNT));
+        stat_frames.fetch_add(1, std::memory_order_relaxed);
         original_frame(rdram, ctx);
     }
 
@@ -71,6 +75,7 @@ namespace {
         if (enabled.load(std::memory_order_relaxed) && (int32_t)MEM_W(0, addr(VIS_PER_FRAME)) == 1 &&
             (uint32_t)MEM_W(0, addr(VI_COUNT)) == frame_start) {
             ctx->r4 = 1;
+            stat_waits.fetch_add(1, std::memory_order_relaxed);
             get_function((int32_t)WAIT_VIS)(rdram, ctx);
         }
         original_after_wait(rdram, ctx);
@@ -98,6 +103,21 @@ namespace adam::framerate {
 
     // Every tick on the main thread (main.cpp update_gfx): follows the 60 FPS switch, also mid-scene.
     void update() {
+        static auto window = std::chrono::steady_clock::now();
+        static uint32_t window_vis = 0;
+        auto now = std::chrono::steady_clock::now();
+        double secs = std::chrono::duration<double>(now - window).count();
+        uint8_t* rdram = game_rdram.load(std::memory_order_relaxed);
+        if (secs >= 5.0 && rdram != nullptr) {
+            uint32_t vis = (uint32_t)MEM_W(0, addr(VI_COUNT));
+            printf("[framerate] %s: %.1f game frames/s, %.1f VIs/s, vis per frame %d, %.1f added waits/s\n",
+                enabled.load() ? "60 fps on" : "60 fps off", stat_frames.exchange(0) / secs,
+                window_vis != 0 ? (vis - window_vis) / secs : 0.0, (int32_t)MEM_W(0, addr(VIS_PER_FRAME)),
+                stat_waits.exchange(0) / secs);
+            fflush(stdout);
+            window = now;
+            window_vis = vis;
+        }
         bool want = adam::get_60fps_enabled();
         if (want == enabled.load(std::memory_order_relaxed)) {
             return;

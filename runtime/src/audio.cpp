@@ -98,7 +98,9 @@ namespace {
                 int16_t frame[2] = { audio_data[i + 1], audio_data[i + 0] };
                 fwrite(frame, sizeof(frame), 1, dump_file);
             }
-            // Also report the production rate: frames received per 5 s of real time vs. the game's rate.
+        }
+        {
+            // Report the production rate (adam_log.txt): frames received per 5 s of real time vs. the game's rate.
             static uint64_t window_start = SDL_GetTicks64();
             static uint64_t window_frames = 0;
             static uint64_t window_chunks = 0;
@@ -119,6 +121,7 @@ namespace {
                 printf("[audio] %.0f frames/s received (game rate %u): %.1f chunks/s of %zu-%zu frames, %u bytes queued in SDL, %llu underruns so far\n",
                     window_frames / secs, sample_rate, window_chunks / secs, min_chunk, max_chunk, SDL_GetQueuedAudioSize(audio_device),
                     (unsigned long long)underruns);
+                fflush(stdout);
                 window_start = now;
                 window_frames = 0;
                 window_chunks = 0;
