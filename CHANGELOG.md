@@ -14,6 +14,11 @@ date (`adam-<date>-<commit>.zip`).
   mission, the file and reset prompts, briefing and results labels, the MAGI vote panels, mission-failed screens,
   and the Angel and weapon names (116 pictures), redrawn in each picture's own colours. Same switch. The staff
   credits are still Japanese.
+- **Fixed: the game closing after the first Angel is beaten** (as its core explodes), with "Failed to find function at
+  0x800416F0" in the log. 16 functions in the overlays were listed as starting a few zero bytes too early (where
+  splat had marked them as data), so a call to their real start found nothing. Their entries in `symbols.toml` now
+  start at the code.
+- **adam_log.txt**: everything adam prints is now saved next to adam.exe (overwritten each start), for reports.
 - **Fixed: 3D flickering in fights and 3D cutscenes**: with Settings -> Graphics -> Framerate on Display or Manual,
   the renderer made up in-between frames, and those had no 3D at all (the Evas and the city showed in one frame of
   three). The game now always runs at its own framerate, whatever that setting says.
