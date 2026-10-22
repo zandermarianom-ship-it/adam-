@@ -12,6 +12,12 @@ on:
 permissions:
   contents: write
 
+# One build at a time: two runs replacing the "latest-build" release at once left it as a draft (only the source
+# code showed on the Releases page).
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   windows:
     runs-on: windows-latest
@@ -72,3 +78,6 @@ jobs:
           gh release delete latest-build --yes --cleanup-tag 2>$null
           $notes = "Built automatically from $env:GITHUB_REF_NAME ($($env:GITHUB_SHA.Substring(0,7))). Unzip anywhere, run adam.exe, choose Load ROM and pick your own ROM (Japanese, .z64). Contains no game data."
           gh release create latest-build "$env:ZIP" --title "Latest build" --notes $notes --target $env:GITHUB_SHA --prerelease
+          if ($LASTEXITCODE -ne 0) { throw "could not create the release" }
+          gh release edit latest-build --draft=false
+          if ($LASTEXITCODE -ne 0) { throw "could not publish the release" }
