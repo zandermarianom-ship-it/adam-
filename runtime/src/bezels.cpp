@@ -622,7 +622,8 @@ namespace adam::bezels {
             decode_tried = true;
             decode_images();
         }
-        if (!ultramodern::is_game_started()) {
+        // (Started with --game, the game can be running before the UI exists.)
+        if (!ultramodern::is_game_started() || !recompui::is_ui_ready()) {
             return;
         }
         if (!overlay_created) {

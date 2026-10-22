@@ -183,7 +183,8 @@ namespace adam::subtitles {
             lines_loaded = true;
             load_lines();
         }
-        if (!ultramodern::is_game_started()) {
+        // (Started with --game, the game can be running before the UI exists.)
+        if (!ultramodern::is_game_started() || !recompui::is_ui_ready()) {
             return;
         }
         enabled.store(adam::get_subtitles_enabled());

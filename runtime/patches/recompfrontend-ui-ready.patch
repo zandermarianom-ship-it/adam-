@@ -1,0 +1,29 @@
+diff --git a/recompui/include/recompui/recompui.h b/recompui/include/recompui/recompui.h
+index 30c463b..2acd8a5 100644
+--- a/recompui/include/recompui/recompui.h
++++ b/recompui/include/recompui/recompui.h
+@@ -59,6 +59,8 @@ namespace recompui {
+     bool is_context_capturing_input();
+     bool is_context_capturing_mouse();
+     bool is_any_context_shown();
++    // adam: whether the UI exists yet (contexts can be created). With --game the game can start first.
++    bool is_ui_ready();
+     ContextId try_close_current_context();
+ 
+     ContextId get_launcher_context_id();
+diff --git a/recompui/src/base/ui_state.cpp b/recompui/src/base/ui_state.cpp
+index aabf17f..e6e33c1 100644
+--- a/recompui/src/base/ui_state.cpp
++++ b/recompui/src/base/ui_state.cpp
+@@ -984,6 +984,11 @@ bool recompui::is_context_capturing_mouse() {
+     return ui_state->is_context_capturing_mouse();
+ }
+ 
++bool recompui::is_ui_ready() {
++    std::lock_guard lock{ui_state_mutex};
++    return ui_state != nullptr;
++}
++
+ bool recompui::is_any_context_shown() {
+     std::lock_guard lock{ui_state_mutex};
+ 
