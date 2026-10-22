@@ -30,6 +30,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <io.h>
 #include <timeapi.h>
 #include <DbgHelp.h>
 #include <TlHelp32.h>
@@ -812,6 +813,18 @@ static void start_watchdog() {
 #endif
 
 int main(int argc, char** argv) {
+    // Started from Explorer (no console, nothing redirected): everything printed goes to adam_log.txt next to adam.exe,
+    // overwritten each start, so a player can send it after a problem. The runtime reports some fatal errors only
+    // there before quitting without a crash dump (e.g. "Failed to find function at 0x..." when the game calls code
+    // the recompiler doesn't know).
+    if (GetFileType(GetStdHandle(STD_ERROR_HANDLE)) == FILE_TYPE_UNKNOWN) {
+        char log_exe[MAX_PATH];
+        GetModuleFileNameA(nullptr, log_exe, MAX_PATH);
+        std::string log_path = (std::filesystem::path{ log_exe }.parent_path() / "adam_log.txt").string();
+        if (freopen(log_path.c_str(), "w", stdout) != nullptr) {
+            _dup2(_fileno(stdout), _fileno(stderr));
+        }
+    }
     // Unbuffered output, so logs survive when the process is killed while redirected to a file.
     setvbuf(stdout, nullptr, _IONBF, 0);
     setvbuf(stderr, nullptr, _IONBF, 0);
