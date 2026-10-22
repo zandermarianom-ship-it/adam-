@@ -825,11 +825,13 @@ static void start_watchdog() {
 #endif
 
 int main(int argc, char** argv) {
-    // Started from Explorer (no console, nothing redirected): everything printed goes to adam_log.txt next to adam.exe,
+    // Not redirected to a file or pipe (started from Explorer: its console window closes with it): everything printed
+    // goes to adam_log.txt next to adam.exe instead,
     // overwritten each start, so a player can send it after a problem. The runtime reports some fatal errors only
     // there before quitting without a crash dump (e.g. "Failed to find function at 0x..." when the game calls code
     // the recompiler doesn't know).
-    if (GetFileType(GetStdHandle(STD_ERROR_HANDLE)) == FILE_TYPE_UNKNOWN) {
+    DWORD err_type = GetFileType(GetStdHandle(STD_ERROR_HANDLE));
+    if (err_type == FILE_TYPE_UNKNOWN || err_type == FILE_TYPE_CHAR) {
         char log_exe[MAX_PATH];
         GetModuleFileNameA(nullptr, log_exe, MAX_PATH);
         std::string log_path = (std::filesystem::path{ log_exe }.parent_path() / "adam_log.txt").string();
