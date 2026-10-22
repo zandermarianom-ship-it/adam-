@@ -19,6 +19,8 @@ date (`adam-<date>-<commit>.zip`).
 - **Smooth 60 FPS (experimental)**, Settings -> General, off by default: the picture at the screen's refresh rate
   (RT64 draws in-between pictures) while the game keeps its own speed. RT64 now sees each game frame whole (the game
   draws one in several graphics tasks; before, its in-between pictures lost the 3D).
+  Fixed a crash with it on (in RT64, when the frame rate dropped and more in-between pictures were needed: seen in
+  the second Angel's fight).
 - **Fixed: the game closing after the first Angel is beaten** (as its core explodes), with "Failed to find function at
   0x800416F0" in the log. 16 functions in the overlays were listed as starting a few zero bytes too early (where
   splat had marked them as data), so a call to their real start found nothing. Their entries in `symbols.toml` now

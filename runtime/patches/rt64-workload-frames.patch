@@ -32,3 +32,18 @@ index 4f10425..cd58639 100644
          void fullSyncFramebufferPairTiles(Workload &workload, FramebufferPair &fbPair, uint32_t &loadOpCursor, uint32_t &rdpTileCursor);
          void listProcessBegin();
          void listProcessEnd();
+diff --git a/src/hle/rt64_workload_queue.cpp b/src/hle/rt64_workload_queue.cpp
+index 5a331aa..abf39f1 100644
+--- a/src/hle/rt64_workload_queue.cpp
++++ b/src/hle/rt64_workload_queue.cpp
+@@ -1048,6 +1048,10 @@ namespace RT64 {
+                 const bool usesHDR = ext.sharedResources->renderTargetManager.usesHDR;
+                 uint32_t requiredFrames = (usingMSAA && generateInterpolatedFrames) ? displayFrames : (displayFrames - 1);
+                 if ((requiredFrames > 0) && (interpolatedTargets.size() < requiredFrames)) {
++                    // adam: the present thread reads this vector (under interpolatedMutex) while it shows earlier
++                    // targets: growing it reallocated the storage under it (a crash in the driver when the frame rate
++                    // dropped and more in-between frames were needed). Grow it under the same lock.
++                    std::scoped_lock<std::mutex> interpolatedLock(ext.sharedResources->interpolatedMutex);
+                     uint32_t previousSize = uint32_t(interpolatedTargets.size());
+                     interpolatedTargets.resize(requiredFrames);
+                     for (uint32_t i = previousSize; i < requiredFrames; i++) {
