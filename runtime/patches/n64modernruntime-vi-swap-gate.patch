@@ -6,10 +6,10 @@ index 2d368d8..91c84f3 100644
  uint32_t get_display_refresh_rate();
  float get_resolution_scale();
  void trigger_config_action();
-+// adam: while fast-forwarding, a framebuffer swap is applied at a VI only once the graphics tasks that were in flight
-+// when the game called osViSwapBuffer (pending_tasks() = the game's own count at that moment) are done, for at most
-+// one normal-speed VI. At 4x+ a VI could otherwise land between the swap and the frame's last tasks reaching the
-+// renderer, which then showed half-drawn frames (HUD missing, black).
++// adam: a framebuffer swap is applied at a VI only once the graphics tasks that were in flight when the game called
++// osViSwapBuffer (pending_tasks() = the game's own count at that moment) are done, for at most three VIs (one normal-speed
++// VI while fast-forwarding). A VI could otherwise land between the swap and the frame's last tasks reaching the
++// renderer, which then showed half-drawn frames (3D scene flickering at 1x, HUD missing or black at 4x+).
 +void set_swap_gate(uint32_t (*pending_tasks)());
  
  // Audio
@@ -42,16 +42,16 @@ index ca1a6d9..ad65e95 100644
  
          // Update VI registers and swap VI modes.
 -        events_context.vi.update_vi();
-+        // adam: while fast-forwarding, keep showing the current framebuffer until the swapped-in one is fully drawn,
-+        // for at most one normal-speed VI (vi_multiplier VIs), so a miscount can never hold the game.
++        // adam: keep showing the current framebuffer until the swapped-in one is fully drawn, for at most three VIs (or
++        // one normal-speed VI = vi_multiplier VIs when fast-forwarding), so a miscount can never hold the game.
 +        PTR(void) deferred_framebuffer = NULLPTR;
 +        {
 +            std::lock_guard lock{ events_context.message_mutex };
 +            ViState* next_state = events_context.vi.get_next_state();
 +            ViState* cur_state = events_context.vi.get_cur_state();
-+            if (vi_multiplier > 1 && swap_pending_tasks != nullptr && ultramodern::is_game_started() &&
++            if (swap_pending_tasks != nullptr && ultramodern::is_game_started() &&
 +                next_state->framebuffer != cur_state->framebuffer && gfx_tasks_done.load() < swap_tasks_needed &&
-+                deferred_vis < vi_multiplier) {
++                deferred_vis < (vi_multiplier > 3 ? vi_multiplier : 3u)) {
 +                deferred_framebuffer = next_state->framebuffer;
 +                next_state->framebuffer = cur_state->framebuffer;
 +                deferred_vis++;
