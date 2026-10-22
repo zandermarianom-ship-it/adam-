@@ -54,8 +54,15 @@ foreach ($prefix in $patchTargets.Keys) {
     }
 }
 
+# Release also gets debug symbols (adam.pdb, not shipped in the zip; CI keeps it as an artifact) for reading crash
+# addresses: /Z7 doesn't change the code, /OPT:REF keeps the exe as small as without /DEBUG.
+$symbolFlags = @()
+if ($Config -eq "Release") {
+    $symbolFlags = @("-DCMAKE_C_FLAGS_RELEASE=/O2 /Ob2 /DNDEBUG /Z7", "-DCMAKE_CXX_FLAGS_RELEASE=/O2 /Ob2 /DNDEBUG /Z7",
+        "-DCMAKE_EXE_LINKER_FLAGS_RELEASE=/DEBUG /OPT:REF")
+}
 cmake -S $src -B $build -G Ninja "-DCMAKE_MAKE_PROGRAM=$ninja" `
-    -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl "-DCMAKE_BUILD_TYPE=$Config" $liveFlag
+    -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl "-DCMAKE_BUILD_TYPE=$Config" $liveFlag @symbolFlags
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 cmake --build $build
