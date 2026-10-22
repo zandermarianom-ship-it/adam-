@@ -62,6 +62,14 @@ jobs:
           "ZIP=$($zip.FullName)" >> $env:GITHUB_ENV
           "ZIPNAME=$($zip.Name)" >> $env:GITHUB_ENV
 
+      # The debug symbols (not in the zip): for reading crash.dmp files and crash addresses from players.
+      - name: Upload the symbols
+        uses: actions/upload-artifact@v4
+        with:
+          name: adam-pdb
+          path: adam/runtime/build-live/adam.pdb
+          if-no-files-found: warn
+
       - name: Upload the zip
         uses: actions/upload-artifact@v4
         with:

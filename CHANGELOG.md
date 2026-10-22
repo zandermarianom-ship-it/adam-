@@ -14,10 +14,8 @@ date (`adam-<date>-<commit>.zip`).
   mission, the file and reset prompts, briefing and results labels, the MAGI vote panels, mission-failed screens,
   and the Angel and weapon names (116 pictures), redrawn in each picture's own colours. Same switch. The staff
   credits are still Japanese.
-- **60 FPS (experimental)**, Settings -> General, off by default: the game runs every VI (60 frames per second)
-  instead of every second or third. The game scales its movement and timers by its frame rate, so it should keep its
-  normal speed; parts that don't may run too fast.
-  Its first build ran the game at 2-3x speed with no sound (the game never waited for the screen at 60): fixed.
+- **60 FPS** was tried (the game running every VI) and taken out again: much of the game counts frames rather than
+  time (attacks, walking), so it ran 2-3x too fast. Smooth 60 FPS by interpolating the picture is being worked on.
 - **Fixed: the game closing after the first Angel is beaten** (as its core explodes), with "Failed to find function at
   0x800416F0" in the log. 16 functions in the overlays were listed as starting a few zero bytes too early (where
   splat had marked them as data), so a call to their real start found nothing. Their entries in `symbols.toml` now
