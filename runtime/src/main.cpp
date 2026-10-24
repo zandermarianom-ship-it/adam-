@@ -575,25 +575,46 @@ static void check_aspect_ratio() {
         recompui::config::get_graphics_config().get_option_value(recompui::config::graphics::options::ar_option)));
     bool gameplay = ultramodern::is_game_started() && adam::rewind::in_gameplay();
     AspectRatio wanted = gameplay ? chosen : AspectRatio::Original;
-    adam::widescreen::set_full_screen(wanted != AspectRatio::Original);
     ultramodern::renderer::GraphicsConfig config = ultramodern::renderer::get_graphics_config();
     // Framerate follows Smooth 60 FPS (General tab), not the Graphics tab: Display (interpolated) with the game's
     // frames grouped (task_ends_frame), else the game's own. Interpolation without the grouping had no 3D in its
     // made-up frames (fights flickered: 3D in one frame of three).
+    // An aspect switch makes RT64 rebuild its pictures, and while it interpolates its present thread can still be
+    // showing one of them (crashes in the driver when a fight began or ended: 16:9 <-> 4:3). So with Smooth 60 FPS
+    // on, interpolation is switched off first, the aspect changes once it has stopped (SETTLE later), and it comes
+    // back SETTLE after that. Scene changes are where the aspect switches, so the pause isn't seen.
+    using clock = std::chrono::steady_clock;
+    constexpr auto SETTLE = std::chrono::milliseconds(400);
+    static clock::time_point interpolation_off_at{};
+    static clock::time_point aspect_changed_at{};
+    auto now = clock::now();
     bool smooth = adam::get_smooth_enabled();
     group_frames = smooth;
-    auto wanted_rate = smooth ? ultramodern::renderer::RefreshRate::Display : ultramodern::renderer::RefreshRate::Original;
+    bool aspect_pending = config.ar_option != wanted;
+    bool hold = smooth && (aspect_pending || now - aspect_changed_at < SETTLE);
+    auto wanted_rate = smooth && !hold ? ultramodern::renderer::RefreshRate::Display : ultramodern::renderer::RefreshRate::Original;
     if (config.rr_option != wanted_rate) {
         config.rr_option = wanted_rate;
         ultramodern::renderer::set_graphics_config(config);
-        printf("[framerate] %s\n", smooth ? "smooth (interpolated to the display)" : "the game's own");
+        if (wanted_rate == ultramodern::renderer::RefreshRate::Original) {
+            interpolation_off_at = now;
+        }
+        printf("[framerate] %s\n", wanted_rate == ultramodern::renderer::RefreshRate::Display ? "smooth (interpolated to the display)" :
+            hold ? "interpolation paused for an aspect switch" : "the game's own");
     }
-    if (config.ar_option != wanted) {
+    if (aspect_pending && smooth && now - interpolation_off_at < SETTLE) {
+        // Wait for RT64 to stop interpolating; the game's picture keeps the aspect RT64 draws in meanwhile.
+        adam::widescreen::set_full_screen(config.ar_option != AspectRatio::Original);
+        return;
+    }
+    if (aspect_pending) {
+        aspect_changed_at = now;
         config.ar_option = wanted;
         ultramodern::renderer::set_graphics_config(config);
         printf("[aspect] %s at %.2f s\n", wanted == AspectRatio::Original ? "Original" : wanted == AspectRatio::Expand ? "Expand" : "Manual",
             game_seconds());
     }
+    adam::widescreen::set_full_screen(wanted != AspectRatio::Original);
 }
 
 // Reset Game (config.cpp "Game" tab): the runtime can't restart the recompiled game in place, so quit cleanly (the save
